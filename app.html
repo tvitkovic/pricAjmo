@@ -279,6 +279,9 @@
           <div class="mlabel">Više ploča odjednom</div>
           <button data-act="multipdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="3" width="12" height="15" rx="2"/><path d="M5 7v12a2 2 0 0 0 2 2h9" stroke-linecap="round"/></svg>Ispis više ploča u PDF…</button>
           <div class="sep"></div>
+          <div class="mlabel">Predlošci</div>
+          <button data-act="saveastpl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7" stroke-linecap="round"/></svg>Spremi ovu ploču kao predložak…</button>
+          <div class="sep"></div>
           <div class="mlabel">Datoteka projekta</div>
           <button data-act="json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z" stroke-linejoin="round"/><path d="M9 13h6M9 17h6M9 9h2" stroke-linecap="round"/></svg>Izvoz projekta (.json)</button>
           <button data-act="import"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9M8 13l4 4 4-4M5 5h14" stroke-linecap="round" stroke-linejoin="round"/></svg>Uvoz projekta (.json)</button>
@@ -736,7 +739,7 @@ const ARASAAC_IMG = function(id){ return "https://static.arasaac.org/pictograms/
 
 /* ---------- State ---------- */
 const LS_KEY = "aac_boards_v2";
-let store = { boards:{}, order:[] };
+let store = { boards:{}, order:[], userTemplates:[] };
 let board = null;
 let selIdx = null;
 let selSet = new Set();
@@ -847,12 +850,12 @@ function resizeCells(){
 function loadStore(){
   try{
     const raw=localStorage.getItem(LS_KEY);
-    if(raw){ const d=JSON.parse(raw); store.boards=d.boards||{}; store.order=d.order||[];
+    if(raw){ const d=JSON.parse(raw); store.boards=d.boards||{}; store.order=d.order||[]; store.userTemplates=d.userTemplates||[];
       if(d.fitz) fitz=Object.assign(JSON.parse(JSON.stringify(FITZ_DEFAULT)), d.fitz); }
   }catch(e){ console.warn("Učitavanje nije uspjelo", e); }
 }
 function persist(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({boards:store.boards, order:store.order, fitz:fitz})); return true; }
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({boards:store.boards, order:store.order, fitz:fitz, userTemplates:store.userTemplates})); return true; }
   catch(e){ toast("Spremanje nije uspjelo — moguće je da je prostor preglednika pun.","err"); return false; }
 }
 let dirty=false;
@@ -1566,7 +1569,45 @@ function applySchedule(kind, steps){
   syncControls(); renderFkey(); renderBoard(); renderCellProps(); switchRTab("cell"); updateSaveState(); resetHistory();
   setTimeout(zoomFit,30); toast("Novi raspored","ok");
 }
-function openTemplates(){
+/* ---------- Korisnički (vlastiti) predlošci ---------- */
+function openSaveAsTemplate(){
+  const ov=document.createElement("div"); ov.className="overlay open";
+  ov.innerHTML='<div class="modal" style="max-width:400px"><h3>Spremi kao predložak</h3>'+
+    '<p>Ploča (uključujući piktograme i boje) bit će spremljena kao predložak za buduće nove ploče.</p>'+
+    '<div class="field"><label>Naziv predloška</label><input type="text" id="tplName" maxlength="60" placeholder="npr. Moja jutarnja rutina" value="'+esc(board.name||"")+'"></div>'+
+    '<div class="mactions"><button class="btn" data-x="cancel">Odustani</button><button class="btn primary" data-x="save">Spremi predložak</button></div></div>';
+  document.body.appendChild(ov);
+  setTimeout(function(){ const e=$("#tplName",ov); if(e){ e.focus(); e.select(); } },30);
+  const submit=function(){
+    const name=($("#tplName",ov).value||"").trim()||"Moj predložak";
+    const snap=JSON.parse(JSON.stringify(board));
+    delete snap.id; delete snap.created; delete snap.modified;
+    store.userTemplates.unshift({ id:uid(), name:name, board:snap, created:Date.now() });
+    persist(); ov.remove(); toast("Predložak spremljen: "+name,"ok");
+  };
+  ov.addEventListener("click",function(e){
+    const x=e.target.dataset?e.target.dataset.x:null;
+    if(e.target===ov || x==="cancel"){ ov.remove(); return; }
+    if(x==="save") submit();
+  });
+  $("#tplName",ov).addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); submit(); } });
+}
+function applyUserTemplate(id){
+  const ut=store.userTemplates.find(function(t){return t.id===id;}); if(!ut) return;
+  board=JSON.parse(JSON.stringify(ut.board)); board.id=uid(); board.created=Date.now(); board.modified=Date.now();
+  clearSelection(); dirty=true; zoom=1; applyZoom();
+  syncControls(); renderFkey(); renderBoard(); renderCellProps(); switchRTab("cell"); updateSaveState(); resetHistory();
+  setTimeout(zoomFit,30); toast("Ploča iz predloška: "+ut.name,"ok");
+}
+function deleteUserTemplate(id){
+  const ut=store.userTemplates.find(function(t){return t.id===id;}); if(!ut) return;
+  confirmDlg("Izbrisati predložak?","Predložak „"+(ut.name||"")+"” bit će trajno izbrisan.","Izbriši",true).then(function(ok){
+    if(!ok) return;
+    store.userTemplates=store.userTemplates.filter(function(t){return t.id!==id;});
+    persist(); toast("Predložak izbrisan","ok"); openTemplates(true);
+  });
+}
+function openTemplates(skipDirtyCheck){
   const go=function(){
     let steps=4;
     let comm="";
@@ -1586,10 +1627,27 @@ function openTemplates(){
       schedBtn("prvozatim","Prvo → Zatim", "2 polja", sq("#fff")+sq("#fff")) +
       schedBtn("traka","Traka koraka (1…N)", "N×1", sq("#fff")+sq("#fff")+sq("#fff")+sq("#fff")) +
       schedBtn("zadacigotovo","Zadaci → Gotovo", "N×2", sq("#CDE9C4")+sq("#CDE9C4")+sq("#CDE9C4")+'<br>'+sq("#F5B8B1")+sq("#F5B8B1")+sq("#F5B8B1"));
+    let userBlock="";
+    if(store.userTemplates.length){
+      let rows="";
+      store.userTemplates.forEach(function(ut){
+        const b=ut.board;
+        const mini=(b.cells||[]).slice(0,b.cols||4).map(function(c){ const col=c.color||(c.cat&&fitz[c.cat]?fitz[c.cat].color:"#eef2f7"); return '<i style="display:inline-block;width:13px;height:13px;border-radius:3px;background:'+col+';border:1px solid #cfd8e2;margin-right:3px"></i>'; }).join("");
+        rows+='<div style="display:flex;align-items:center;gap:8px;width:100%;border:1px solid var(--line);border-radius:11px;margin-bottom:8px;background:#fff;padding:5px">'+
+          '<button data-utpl="'+ut.id+'" style="flex:1;display:flex;align-items:center;gap:11px;text-align:left;padding:6px 7px;background:transparent;border:none;cursor:pointer">'+
+            '<div style="flex:1"><div style="font-weight:700;font-size:13.5px;margin-bottom:5px">'+esc(ut.name)+'</div><div>'+mini+'</div></div>'+
+            '<div style="font-size:11.5px;color:var(--muted);font-weight:600;white-space:nowrap">'+(b.cols||"?")+'×'+(b.rows||"?")+'</div>'+
+          '</button>'+
+          '<button data-udel="'+ut.id+'" title="Izbriši predložak" style="flex-shrink:0;border:none;background:transparent;color:var(--muted);padding:7px;border-radius:8px;cursor:pointer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+        '</div>';
+      });
+      userBlock='<div style="font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 9px">Moji predlošci</div>'+rows;
+    }
     const ov=document.createElement("div"); ov.className="overlay open";
     ov.innerHTML='<div class="modal" style="max-width:460px"><h3>Nova ploča iz predloška</h3>'+
       '<p>Odaberi gotov raspored kao polaznu točku — sve se može naknadno urediti.</p>'+
       '<div style="max-height:56vh;overflow:auto;margin:0 -2px 16px;padding:0 2px">'+
+        userBlock+
         '<div style="font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:2px 0 9px">Vizualni rasporedi</div>'+
         '<div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;font-size:13px"><span style="font-weight:600">Broj koraka:</span>'+
           '<div class="zoomr" style="display:inline-flex"><button type="button" data-step="-1">−</button><span id="tplSteps" style="min-width:26px;text-align:center;font-weight:700">'+steps+'</span><button type="button" data-step="1">+</button></div></div>'+
@@ -1607,11 +1665,15 @@ function openTemplates(){
       if(st){ steps=Math.max(2,Math.min(10,steps+(+st.dataset.step))); stepsEl.textContent=steps; return; }
       const sc=e.target.closest("[data-sched]");
       if(sc){ ov.remove(); applySchedule(sc.dataset.sched, steps); return; }
+      const ud=e.target.closest("[data-udel]");
+      if(ud){ deleteUserTemplate(ud.dataset.udel); return; }
+      const ut=e.target.closest("[data-utpl]");
+      if(ut){ ov.remove(); applyUserTemplate(ut.dataset.utpl); return; }
       const tb=e.target.closest("[data-tpl]");
       if(tb){ ov.remove(); applyTemplate(TEMPLATES[+tb.dataset.tpl]); }
     });
   };
-  if(dirty){ confirmDlg("Nova ploča iz predloška?","Trenutna ploča ima nespremljene promjene koje će biti izgubljene.","Nastavi",true).then(function(ok){ if(ok) go(); }); }
+  if(!skipDirtyCheck && dirty){ confirmDlg("Nova ploča iz predloška?","Trenutna ploča ima nespremljene promjene koje će biti izgubljene.","Nastavi",true).then(function(ok){ if(ok) go(); }); }
   else go();
 }
 function duplicateBoard(id){
@@ -1702,6 +1764,7 @@ function wireEvents(){
     else if(a==="svg") exportSVG();
     else if(a==="json") exportJSON();
     else if(a==="multipdf") openMultiPrint();
+    else if(a==="saveastpl") openSaveAsTemplate();
     else if(a==="import") $("#importInput").click();
   }; });
 
