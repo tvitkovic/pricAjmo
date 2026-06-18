@@ -1,0 +1,41 @@
+KAKO NAPRAVITI GITHUB TOKEN (treba samo jednom)
+================================================
+
+Token je poput lozinke koja dopušta da "4-Objavi-novu-verziju.bat"
+objavi novu verziju na tvoj GitHub. Napraviš ga jednom i čuvaš.
+
+KORACI
+------
+1. Prijavi se na https://github.com (svojim računom tvitkovic).
+
+2. Otvori ovu adresu (zalijepi u preglednik):
+   https://github.com/settings/tokens
+
+3. Klikni "Generate new token"  ->  "Generate new token (classic)".
+
+4. Ispuni:
+   - Note (naziv):  pricAjmo objava
+   - Expiration (rok): No expiration  (ili 1 godina, po želji)
+   - Select scopes (ovlasti): označi kvačicu "repo"
+     (to je dovoljno; obuhvaća sve ispod sebe)
+
+5. Na dnu klikni "Generate token".
+
+6. GitHub će prikazati token (dugi niz znakova koji počinje sa "ghp_...").
+   VAŽNO: kopiraj ga ODMAH i spremi na sigurno mjesto (npr. u svoju
+   bilježnicu lozinki). Nakon zatvaranja stranice više se NE može vidjeti.
+
+KAKO GA KORISTITI
+-----------------
+Kad pokreneš "4-Objavi-novu-verziju.bat", on će te pitati za token —
+samo ga zalijepi (desni klik miša ili Ctrl+V) i pritisni Enter.
+
+Ako ti dosadi lijepiti svaki put, možeš ga trajno spremiti na računalo:
+  - Windows tipka -> upiši "varijable okruzenja" -> otvori
+    "Uredi varijable okruzenja sustava" -> Environment Variables
+  - Pod "User variables" klikni New:
+       Naziv:    GH_TOKEN
+       Value:    (zalijepi token)
+  - OK. Od tada bat nece vise pitati za token.
+
+Token nikome ne dijeli — to je kao lozinka.

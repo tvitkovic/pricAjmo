@@ -1,0 +1,29 @@
+pricAjmo — ŠTO POKRENUTI (datoteke za dvoklik)
+================================================
+
+Umjesto tipkanja naredbi, samo dvoklikni odgovarajuću datoteku.
+SVE datoteke moraju ostati zajedno u OVOJ mapi.
+
+1-Instaliraj-alate.bat
+   Pokreni JEDNOM na početku (i kad nova verzija donese nove pakete).
+   Preuzima Electron i potrebne alate.
+
+2-Pokreni-probno.bat
+   Brzo otvori pricAjmo da isprobaš promjene (bez izrade instalacije).
+
+3-Napravi-instalaciju.bat
+   Napravi .exe (u podmapi "dist") za slanje kolegama preko npr.
+   Google Drive-a. Ovo NE uključuje automatsko ažuriranje.
+
+4-Objavi-novu-verziju.bat
+   Objavi novu verziju na GitHub tako da je korisnici dobiju
+   AUTOMATSKI (auto-update). Prvi put treba GitHub token —
+   vidi: KAKO-NAPRAVITI-GITHUB-TOKEN.txt
+
+------------------------------------------------
+REDOSLIJED KAD RADIŠ IZMJENU (npr. zamijeniš app.html):
+  1) dvoklik: 1-Instaliraj-alate.bat   (samo ako je stigao novi paket)
+  2) dvoklik: 2-Pokreni-probno.bat     (provjeri da radi)
+  3) dvoklik: 4-Objavi-novu-verziju.bat (objavi svima automatski)
+
+Detaljnije je u datoteci README.md
