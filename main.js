@@ -100,10 +100,29 @@ function createWindow () {
     }).catch(() => { item.cancel(); });
   });
 
-  // Sigurnosna mreža: ako se prozor zatvara, a nešto u pozadini blokira
-  // izlazak (npr. zaglavljen mrežni poziv), prisilno ugasi nakon kratke pauze.
-  mainWindow.on('close', () => {
-    setTimeout(() => { app.exit(0); }, 4000);
+  // Upozorenje o nespremljenim promjenama prilikom zatvaranja prozora.
+  // (beforeunload iz web stranice ne otvara pouzdan dijalog u Electronu na
+  // Windowsima, pa se umjesto toga pita izravno preko Electron dialoga.)
+  let forceCloseApproved = false;
+  mainWindow.on('close', (e) => {
+    if (forceCloseApproved) return;
+    e.preventDefault();
+    mainWindow.webContents.executeJavaScript('typeof dirty !== "undefined" ? !!dirty : false')
+      .then((isDirty) => {
+        if (!isDirty) { forceCloseApproved = true; mainWindow.close(); return; }
+        dialog.showMessageBox(mainWindow, {
+          type: 'warning',
+          title: 'pričAjmo — nespremljene promjene',
+          message: 'Ova ploča ima nespremljene promjene.',
+          detail: 'Ako zatvoriš sada, te promjene će biti izgubljene.',
+          buttons: ['Zatvori bez spremanja', 'Odustani'],
+          cancelId: 1,
+          defaultId: 1
+        }).then((result) => {
+          if (result.response === 0) { forceCloseApproved = true; mainWindow.close(); }
+        });
+      })
+      .catch(() => { forceCloseApproved = true; mainWindow.close(); });
   });
 
   mainWindow.on('closed', () => { mainWindow = null; });
