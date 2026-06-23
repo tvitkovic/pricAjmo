@@ -95,8 +95,15 @@ function createWindow () {
     const filters = ext
       ? [{ name: ext.toUpperCase(), extensions: [ext] }, { name: 'Sve datoteke', extensions: ['*'] }]
       : [{ name: 'Sve datoteke', extensions: ['*'] }];
-    const savePath = dialog.showSaveDialogSync(mainWindow, { defaultPath: name, filters });
-    if (savePath) { item.setSavePath(savePath); } else { item.cancel(); }
+    dialog.showSaveDialog(mainWindow, { defaultPath: name, filters }).then((result) => {
+      if (result.filePath) { item.setSavePath(result.filePath); } else { item.cancel(); }
+    }).catch(() => { item.cancel(); });
+  });
+
+  // Sigurnosna mreža: ako se prozor zatvara, a nešto u pozadini blokira
+  // izlazak (npr. zaglavljen mrežni poziv), prisilno ugasi nakon kratke pauze.
+  mainWindow.on('close', () => {
+    setTimeout(() => { app.exit(0); }, 4000);
   });
 
   mainWindow.on('closed', () => { mainWindow = null; });
@@ -182,4 +189,9 @@ app.whenReady().then(() => {
   setTimeout(() => checkForUpdates(true), 3000);
 });
 
-app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+    setTimeout(() => { app.exit(0); }, 2000);
+  }
+});
