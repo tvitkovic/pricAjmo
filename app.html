@@ -283,6 +283,10 @@
           <div class="mlabel">Predlošci</div>
           <button data-act="saveastpl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7" stroke-linecap="round"/></svg>Spremi ovu ploču kao predložak…</button>
           <div class="sep"></div>
+          <div class="mlabel">Dijeljenje ploča</div>
+          <button data-act="shareexport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.8M8.6 13.4l6.8 3.8" stroke-linecap="round"/></svg>Izvezi ploču za dijeljenje…</button>
+          <button data-act="shareimport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M8 8l4-4 4 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke-linecap="round"/></svg>Učitaj ploču drugog korisnika…</button>
+          <div class="sep"></div>
           <div class="mlabel">Datoteka projekta</div>
           <button data-act="json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z" stroke-linejoin="round"/><path d="M9 13h6M9 17h6M9 9h2" stroke-linecap="round"/></svg>Izvoz projekta (.json)</button>
           <button data-act="import"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9M8 13l4 4 4-4M5 5h14" stroke-linecap="round" stroke-linejoin="round"/></svg>Uvoz projekta (.json)</button>
@@ -329,6 +333,7 @@
         <button class="btn sm" id="btnTemplates" style="width:100%;justify-content:center;margin-bottom:14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Nova iz predloška…</button>
         <div id="boardList"></div>
       </div>
+      <div class="no-print" style="flex-shrink:0;padding:8px 14px;font-size:10px;line-height:1.55;color:var(--muted);border-top:1px solid var(--line);background:var(--panel)">Izradio: Tomislav Vitković, mag. rehab. educ.<br>Piktogrami: Sergio Palao / ARASAAC (arasaac.org), CC BY-NC-SA, © Vlada Aragonije (Španjolska)</div>
     </aside>
 
     <main class="center">
@@ -597,7 +602,6 @@
 </div>
 
 <canvas id="exportCanvas" style="display:none"></canvas>
-<div class="no-print" style="position:fixed;right:12px;bottom:9px;font-size:10.5px;color:#6b7785;background:rgba(255,255,255,.74);padding:2px 9px;border-radius:7px;pointer-events:none;z-index:6;box-shadow:0 1px 3px rgba(0,0,0,.07);text-align:right;line-height:1.5">Izradio: Tomislav Vitković, mag. rehab. educ.<br>Autor piktograma: Sergio Palao. Podrijetlo: ARASAAC (arasaac.org). Licenca: CC (BY-NC-SA). Vlasnik: Vlada Aragonije (Španjolska).</div>
 
 <script>
 "use strict";
@@ -1580,6 +1584,48 @@ function applySchedule(kind, steps){
   setTimeout(zoomFit,30); toast("Novi raspored","ok");
 }
 /* ---------- Korisnički (vlastiti) predlošci ---------- */
+/* ---------- Dijeljenje ploča (izvoz/uvoz s autorom) ---------- */
+function openShareExport(){
+  const ov=document.createElement("div"); ov.className="overlay open";
+  ov.innerHTML='<div class="modal" style="max-width:400px"><h3>Izvezi ploču za dijeljenje</h3>'+
+    '<p>Stvara se datoteka koju možeš poslati drugoj osobi (e-poštom, Google Driveom…). Ona je može učitati preko „Učitaj ploču drugog korisnika…”.</p>'+
+    '<div class="field"><label>Tvoje ime (prikazat će se kao autor)</label><input type="text" id="shareAuthor" maxlength="60" placeholder="npr. Tomislav Vitković"></div>'+
+    '<div class="mactions"><button class="btn" data-x="cancel">Odustani</button><button class="btn primary" data-x="export">Spremi datoteku</button></div></div>';
+  document.body.appendChild(ov);
+  try{ const last=localStorage.getItem("aac_share_author"); if(last) $("#shareAuthor",ov).value=last; }catch(e){}
+  setTimeout(function(){ const e=$("#shareAuthor",ov); if(e){ e.focus(); e.select(); } },30);
+  const submit=function(){
+    const author=($("#shareAuthor",ov).value||"").trim()||"Nepoznat autor";
+    try{ localStorage.setItem("aac_share_author", author); }catch(e){}
+    const snap=JSON.parse(JSON.stringify(board));
+    delete snap.id; delete snap.created; delete snap.modified;
+    const data={ app:"pricAjmo", kind:"shared-board", version:1, author:author, sharedAt:Date.now(), board:snap };
+    downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}), "pricAjmo-ploca-"+(board.name||"bez naziva").replace(/[^\w\u00C0-\u024f\-]+/g,"_")+".json");
+    ov.remove(); toast("Ploča izvezena za dijeljenje","ok");
+  };
+  ov.addEventListener("click",function(e){
+    const x=e.target.dataset?e.target.dataset.x:null;
+    if(e.target===ov || x==="cancel"){ ov.remove(); return; }
+    if(x==="export") submit();
+  });
+  $("#shareAuthor",ov).addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); submit(); } });
+}
+function importSharedBoard(file){
+  const fr=new FileReader();
+  fr.onload=function(){
+    try{
+      const d=JSON.parse(fr.result);
+      const b=d.board||d; if(!b||!b.cells||!b.rows) throw new Error("format");
+      const author=(d.author&&String(d.author).trim())||"Nepoznat autor";
+      const name=(b.name||"Ploča bez naziva");
+      store.userTemplates.unshift({ id:uid(), name:name, author:author, board:b, created:Date.now(), shared:true });
+      persist();
+      toast("Ploča učitana u „Moji predlošci” — autor: "+author,"ok");
+    }catch(e){ toast("Datoteka nije ispravna ploča za dijeljenje.","err"); }
+  };
+  fr.readAsText(file);
+}
+
 function openSaveAsTemplate(){
   const ov=document.createElement("div"); ov.className="overlay open";
   ov.innerHTML='<div class="modal" style="max-width:400px"><h3>Spremi kao predložak</h3>'+
@@ -1643,9 +1689,10 @@ function openTemplates(skipDirtyCheck){
       store.userTemplates.forEach(function(ut){
         const b=ut.board;
         const mini=(b.cells||[]).slice(0,b.cols||4).map(function(c){ const col=c.color||(c.cat&&fitz[c.cat]?fitz[c.cat].color:"#eef2f7"); return '<i style="display:inline-block;width:13px;height:13px;border-radius:3px;background:'+col+';border:1px solid #cfd8e2;margin-right:3px"></i>'; }).join("");
+        const authorTag = ut.shared ? '<div style="font-size:10.5px;color:var(--accent-d);font-weight:600;margin-top:3px">↓ Dijeljeno · autor: '+esc(ut.author||"Nepoznat autor")+'</div>' : "";
         rows+='<div style="display:flex;align-items:center;gap:8px;width:100%;border:1px solid var(--line);border-radius:11px;margin-bottom:8px;background:#fff;padding:5px">'+
           '<button data-utpl="'+ut.id+'" style="flex:1;display:flex;align-items:center;gap:11px;text-align:left;padding:6px 7px;background:transparent;border:none;cursor:pointer">'+
-            '<div style="flex:1"><div style="font-weight:700;font-size:13.5px;margin-bottom:5px">'+esc(ut.name)+'</div><div>'+mini+'</div></div>'+
+            '<div style="flex:1"><div style="font-weight:700;font-size:13.5px;margin-bottom:5px">'+esc(ut.name)+'</div><div>'+mini+'</div>'+authorTag+'</div>'+
             '<div style="font-size:11.5px;color:var(--muted);font-weight:600;white-space:nowrap">'+(b.cols||"?")+'×'+(b.rows||"?")+'</div>'+
           '</button>'+
           '<button data-udel="'+ut.id+'" title="Izbriši predložak" style="flex-shrink:0;border:none;background:transparent;color:var(--muted);padding:7px;border-radius:8px;cursor:pointer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
@@ -1776,6 +1823,8 @@ function wireEvents(){
     else if(a==="json") exportJSON();
     else if(a==="multipdf") openMultiPrint();
     else if(a==="saveastpl") openSaveAsTemplate();
+    else if(a==="shareexport") openShareExport();
+    else if(a==="shareimport") $("#shareImportInput").click();
     else if(a==="import") $("#importInput").click();
   }; });
 
@@ -1808,6 +1857,10 @@ function wireEvents(){
   const imp=document.createElement("input"); imp.type="file"; imp.accept="application/json,.json"; imp.id="importInput"; imp.style.display="none";
   document.body.appendChild(imp);
   imp.addEventListener("change",function(e){ if(e.target.files[0]) importJSON(e.target.files[0]); e.target.value=""; });
+
+  const shImp=document.createElement("input"); shImp.type="file"; shImp.accept="application/json,.json"; shImp.id="shareImportInput"; shImp.style.display="none";
+  document.body.appendChild(shImp);
+  shImp.addEventListener("change",function(e){ if(e.target.files[0]) importSharedBoard(e.target.files[0]); e.target.value=""; });
 
   // canvas toolbar — layout steppers
   $("#colMinus").onclick=function(){ setCols(board.cols-1); };
