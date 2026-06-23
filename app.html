@@ -267,6 +267,7 @@
       <button class="btn" id="btnInstall" style="display:none" title="Instaliraj aplikaciju na uređaj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round"/></svg>Instaliraj</button>
       <button class="btn" id="btnTemplatesTop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Predlošci</button>
       <button class="btn" id="btnNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>Nova</button>
+      <button class="btn" id="btnDeleteBoard" title="Izbriši trenutnu ploču"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke-linecap="round" stroke-linejoin="round"/></svg>Izbriši</button>
       <button class="btn primary" id="btnSave"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11l3 3v13H5z" stroke-linejoin="round"/><path d="M8 4v5h7M8 14h8" stroke-linecap="round"/></svg>Spremi</button>
       <div class="menu-wrap">
         <button class="btn" id="btnExport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 7l4-4 4 4M5 15v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Izvoz</button>
@@ -596,7 +597,7 @@
 </div>
 
 <canvas id="exportCanvas" style="display:none"></canvas>
-<div class="no-print" style="position:fixed;right:12px;bottom:9px;font-size:10.5px;color:#6b7785;background:rgba(255,255,255,.74);padding:2px 9px;border-radius:7px;pointer-events:none;z-index:6;box-shadow:0 1px 3px rgba(0,0,0,.07)">Izradio: Tomislav Vitković, mag. rehab. educ.</div>
+<div class="no-print" style="position:fixed;right:12px;bottom:9px;font-size:10.5px;color:#6b7785;background:rgba(255,255,255,.74);padding:2px 9px;border-radius:7px;pointer-events:none;z-index:6;box-shadow:0 1px 3px rgba(0,0,0,.07);text-align:right;line-height:1.5">Izradio: Tomislav Vitković, mag. rehab. educ.<br>Autor piktograma: Sergio Palao. Podrijetlo: ARASAAC (arasaac.org). Licenca: CC (BY-NC-SA). Vlasnik: Vlada Aragonije (Španjolska).</div>
 
 <script>
 "use strict";
@@ -1382,9 +1383,18 @@ function deleteBoard(id){
   });
 }
 
-/* ============================================================
-   FITZGERALD — paleta boja
-   ============================================================ */
+function deleteCurrentBoard(){
+  if(board && board.id && store.boards[board.id]){
+    deleteBoard(board.id);
+  } else {
+    confirmDlg("Izbrisati ovu ploču?","Ova ploča još nije spremljena. Želiš li je odbaciti i započeti novu, praznu ploču?","Izbriši",true).then(function(ok){
+      if(!ok) return;
+      board=newBoard(); clearSelection(); dirty=false;
+      syncControls(); renderFkey(); renderBoard(); renderCellProps(); updateSaveState(); resetHistory();
+      toast("Nova prazna ploča");
+    });
+  }
+}
 function buildCellCatOptions(){
   const sel=$("#cellCat");
   let h='<option value="">— bez kategorije —</option>';
@@ -1750,6 +1760,7 @@ function wireEvents(){
   $("#btnNew").onclick=newBoardAction;
   $("#btnNewBoard2").onclick=newBoardAction;
   $("#btnSave").onclick=function(){ saveBoard(); };
+  $("#btnDeleteBoard").onclick=deleteCurrentBoard;
   $("#boardName").addEventListener("input",function(e){ board.name=e.target.value; markDirty(); const t=$("#pageTitle"); t.textContent=board.name; t.className="page-title"+((board.showTitle&&board.name)?"":" hidden"); });
 
   // export menu
