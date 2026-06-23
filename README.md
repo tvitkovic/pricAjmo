@@ -57,6 +57,34 @@ Ikona se nalazi u mapi `build/` (`icon.png` 1024×1024 za macOS/Linux,
 `icon.ico` za Windows). Ako želite svoju ikonu, zamijenite te datoteke
 (zadržite imena i veličine) i ponovno pokrenite `npm run dist`.
 
+## Automatsko ažuriranje (GitHub Releases)
+
+Aplikacija sad sama provjerava ima li nove verzije (kratko nakon pokretanja, i
+preko izbornika **Pomoć → Provjeri ažuriranja…**). Ako postoji nova verzija na
+GitHub Releases stranici repozitorija, korisnik dobije ponudu da je preuzme;
+nakon preuzimanja, ponudi se ponovno pokretanje koje primjenjuje ažuriranje.
+Spremljene ploče ostaju sačuvane.
+
+### Kako objaviti novu verziju (za tebe, kao izdavača)
+
+1. U `package.json` povećaj broj `"version"` (npr. `1.1.0` → `1.2.0`).
+2. Potreban je GitHub **Personal Access Token** (jednom, postavi kao varijablu
+   okruženja `GH_TOKEN`) da electron-builder može objaviti datoteke na GitHub:
+   - GitHub → Settings → Developer settings → Personal access tokens →
+     Generate new token (classic) → dovoljna ovlast `repo`.
+   - U Command Promptu (samo u toj sesiji): `set GH_TOKEN=tvoj_token_ovdje`
+3. Pokreni:
+   ```bash
+   npm run publish:win
+   ```
+   Ovo izgradi instalaciju **i** je odmah postavi kao novi GitHub Release —
+   korisnici koji već imaju instaliranu stariju verziju automatski dobivaju
+   ponudu za ažuriranje sljedeći put kad otvore pričAjmo (ili odmah, preko
+   Pomoć → Provjeri ažuriranja…).
+4. Prva instalacija koju korisnik dobije (npr. preko Google Drive linka) mora
+   već imati ugrađen auto-updater (ova verzija ga ima) da bi buduća ažuriranja
+   stizala automatski.
+
 ## Napomene
 
 - Ako želite **digitalno potpisati** aplikaciju (da Windows/macOS ne prikazuju

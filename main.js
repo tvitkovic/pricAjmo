@@ -1,7 +1,67 @@
 const { app, BrowserWindow, Menu, dialog, shell } = require('electron');
 const path = require('path');
+const { autoUpdater } = require('electron-updater');
 
 let mainWindow = null;
+
+/* ============================================================
+   AUTOMATSKO AŽURIRANJE (GitHub Releases)
+   ============================================================ */
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = true;
+
+function checkForUpdates (silent) {
+  autoUpdater.checkForUpdates().catch((err) => {
+    if (!silent) dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'pričAjmo',
+      message: 'Provjera ažuriranja nije uspjela.',
+      detail: 'Provjeri internetsku vezu i pokušaj ponovno kasnije.\n\n' + (err && err.message ? err.message : ''),
+      buttons: ['U redu']
+    });
+  });
+}
+
+autoUpdater.on('update-available', (info) => {
+  dialog.showMessageBox(mainWindow, {
+    type: 'info',
+    title: 'pričAjmo — nova verzija',
+    message: 'Dostupna je nova verzija pričAjmo (' + info.version + ').',
+    detail: 'Želiš li je preuzeti sada? Aplikacija će se ponovno pokrenuti nakon preuzimanja.',
+    buttons: ['Preuzmi', 'Kasnije'],
+    cancelId: 1,
+    defaultId: 0
+  }).then((res) => {
+    if (res.response === 0) {
+      autoUpdater.downloadUpdate();
+      dialog.showMessageBox(mainWindow, {
+        type: 'info', title: 'pričAjmo', message: 'Preuzimanje u tijeku…',
+        detail: 'Javit ćemo se kad bude spremno za instalaciju.', buttons: ['U redu']
+      });
+    }
+  });
+});
+
+autoUpdater.on('update-not-available', () => {
+  if (global._pricajmoManualCheck) {
+    dialog.showMessageBox(mainWindow, { type: 'info', title: 'pričAjmo', message: 'Već koristiš najnoviju verziju.', buttons: ['U redu'] });
+    global._pricajmoManualCheck = false;
+  }
+});
+
+autoUpdater.on('error', () => { global._pricajmoManualCheck = false; });
+
+autoUpdater.on('update-downloaded', () => {
+  dialog.showMessageBox(mainWindow, {
+    type: 'info',
+    title: 'pričAjmo — ažuriranje spremno',
+    message: 'Nova verzija je preuzeta.',
+    detail: 'Ponovno pokreni aplikaciju da se ažuriranje primijeni. Spremljene ploče ostaju sačuvane.',
+    buttons: ['Ponovno pokreni sada', 'Kasnije'],
+    cancelId: 1,
+    defaultId: 0
+  }).then((res) => { if (res.response === 0) autoUpdater.quitAndInstall(); });
+});
 
 function createWindow () {
   mainWindow = new BrowserWindow({
@@ -104,6 +164,8 @@ function buildMenu () {
   tpl.push({
     label: 'Pomoć',
     submenu: [
+      { label: 'Provjeri ažuriranja…', click: () => { global._pricajmoManualCheck = true; checkForUpdates(false); } },
+      { type: 'separator' },
       { label: 'ARASAAC (web)', click: () => shell.openExternal('https://arasaac.org') },
       { label: 'Povratne informacije (e-pošta)', click: () => shell.openExternal('mailto:tomislav.vitkovic.reh@gmail.com?subject=' + encodeURIComponent('pričAjmo — povratne informacije')) },
       { label: 'O Fitzgeraldovu ključu (web)', click: () => shell.openExternal('https://www.assistiveware.com/learn-aac/symbols-and-color-coding') }
@@ -117,6 +179,7 @@ app.whenReady().then(() => {
   createWindow();
   buildMenu();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+  setTimeout(() => checkForUpdates(true), 3000);
 });
 
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
