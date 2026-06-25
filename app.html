@@ -158,6 +158,31 @@
   .page-title.hidden{display:none}
   .grid{display:grid;gap:var(--gap,10px)}
   .cell{border:var(--cell-bw,2px) solid var(--cell-bc,#d7dde6);border-radius:var(--cell-r,10px);background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:box-shadow .1s,border-color .1s;cursor:pointer;min-height:0}
+  .linkbadge{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:6px;background:rgba(45,109,170,.92);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.25);z-index:2}
+  .linkbadge svg{width:13px;height:13px}
+  /* Komunikacijski (use) način */
+  #useBar{display:none;align-items:center;gap:12px;padding:8px 14px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:nowrap}
+  body.use-mode #useBar{display:flex}
+  body.use-mode .side{display:none}
+  body.use-mode .canvas-toolbar{display:none}
+  body.use-mode .edit-only{display:none !important}
+  body.use-mode .cdel{display:none !important}
+  body.use-mode .cplus{display:none !important}
+  body.use-mode .cell{cursor:pointer}
+  .ub-nav{display:flex;align-items:center;gap:6px;flex-shrink:0}
+  .ub-nav button,.ub-actions button{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 10px;cursor:pointer;font:inherit;font-size:13px;color:var(--ink)}
+  .ub-nav button:disabled{opacity:.4;cursor:default}
+  .ub-nav button:hover:not(:disabled),.ub-actions button:hover{background:var(--panel)}
+  .ub-name{font-weight:700;font-size:14px;margin-left:4px;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+  .ub-sent{flex:1;display:flex;align-items:center;gap:8px;overflow-x:auto;min-height:54px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+  .ub-empty{color:var(--muted);font-size:13px;white-space:nowrap}
+  .sent-item{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px 6px;min-width:52px}
+  .sent-item .si-img{width:34px;height:34px;display:flex;align-items:center;justify-content:center}
+  .sent-item .si-img img,.sent-item .si-img svg{max-width:100%;max-height:100%;object-fit:contain}
+  .sent-item .si-lab{font-size:11px;font-weight:600;max-width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ub-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+  .ub-actions .primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .ub-actions .primary:hover{background:var(--accent-d)}
   .cell.lbl-top{flex-direction:column-reverse}
   .cell:hover{border-color:var(--accent)}
   .cell.sel{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);z-index:2}
@@ -228,7 +253,7 @@
     .page{box-shadow:none !important;transform:none !important;margin:0 auto !important;border-radius:0 !important;width:auto !important}
     .cell{break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .cimg,.clab,.page-title,.page{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .cdel,.cell-preview{display:none !important}
+    .cdel,.cell-preview,.linkbadge{display:none !important}
     body.multi-print .app{display:none !important}
     body.multi-print #multiPrint{display:block !important}
     .print-cell,.print-title,.print-page{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -252,10 +277,10 @@
       <span class="logo"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%221024%22%20height%3D%221024%22%20viewBox%3D%220%200%201024%201024%22%3E%20%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220.4%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23A6D3F0%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237DB9E8%22/%3E%3C/linearGradient%3E%20%3Cfilter%20id%3D%22sh%22%20x%3D%22-20%25%22%20y%3D%22-20%25%22%20width%3D%22140%25%22%20height%3D%22140%25%22%3E%3CfeDropShadow%20dx%3D%220%22%20dy%3D%2210%22%20stdDeviation%3D%2218%22%20flood-color%3D%22%231c4a6e%22%20flood-opacity%3D%220.22%22/%3E%3C/filter%3E%3C/defs%3E%20%3Crect%20width%3D%221024%22%20height%3D%221024%22%20rx%3D%22220%22%20fill%3D%22url%28%23bg%29%22/%3E%20%3Cg%20filter%3D%22url%28%23sh%29%22%3E%20%3Cpath%20d%3D%22M512%2096C260%2096%20150%20250%20150%20408c0%20132%2096%20236%20250%20262l-40%20150%20175-150c1%200%2014%200%2017%200%20252%200%20360-130%20360-262C912%20250%20764%2096%20512%2096z%22%20fill%3D%22%23ffffff%22/%3E%20%3C/g%3E%20%3Cg%20transform%3D%22translate%28306.0%2C210.0%29%22%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20rx%3D%2224%22%20fill%3D%22%23FBEFB0%22%20stroke%3D%22%23c4d0dd%22%20stroke-width%3D%223%22/%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2260%22%20r%3D%2233%22%20fill%3D%22none%22%20stroke%3D%22%23243240%22%20stroke-width%3D%227%22/%3E%3Ccircle%20cx%3D%2248%22%20cy%3D%2252%22%20r%3D%225%22%20fill%3D%22%23243240%22/%3E%3Ccircle%20cx%3D%2272%22%20cy%3D%2252%22%20r%3D%225%22%20fill%3D%22%23243240%22/%3E%3Cpath%20d%3D%22M44%2070a18%2012%200%200%200%2032%200%22%20fill%3D%22none%22%20stroke%3D%22%23243240%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28452.0%2C210.0%29%22%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20rx%3D%2224%22%20fill%3D%22%23CDE9C4%22%20stroke%3D%22%23c4d0dd%22%20stroke-width%3D%223%22/%3E%3Cpath%20d%3D%22M60%2038c-6-10-30-8-30%2014%200%2020%2016%2032%2030%2032s30-12%2030-32c0-22-24-24-30-14z%22%20fill%3D%22%23E8736A%22%20stroke%3D%22%23243240%22%20stroke-width%3D%226%22%20stroke-linejoin%3D%22round%22/%3E%3Cpath%20d%3D%22M60%2038c0-10%206-16%2014-16%22%20fill%3D%22none%22%20stroke%3D%22%23243240%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28598.0%2C210.0%29%22%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20rx%3D%2224%22%20fill%3D%22%23BBDCF4%22%20stroke%3D%22%23c4d0dd%22%20stroke-width%3D%223%22/%3E%3Crect%20x%3D%2234%22%20y%3D%2250%22%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%20fill%3D%22%237FB2E8%22%20stroke%3D%22%23243240%22%20stroke-width%3D%226%22/%3E%3Crect%20x%3D%2262%22%20y%3D%2238%22%20width%3D%2228%22%20height%3D%2228%22%20rx%3D%226%22%20fill%3D%22%23fff%22%20stroke%3D%22%23243240%22%20stroke-width%3D%226%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28306.0%2C356.0%29%22%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20rx%3D%2224%22%20fill%3D%22%23CDE9C4%22%20stroke%3D%22%23c4d0dd%22%20stroke-width%3D%223%22/%3E%3Cpath%20d%3D%22M32%2056h56a28%2028%200%200%201-56%200z%22%20fill%3D%22%23fff%22%20stroke%3D%22%23243240%22%20stroke-width%3D%226%22%20stroke-linejoin%3D%22round%22/%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2248%22%20r%3D%224%22%20fill%3D%22%23E8736A%22/%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%2246%22%20r%3D%224%22%20fill%3D%22%236BA84F%22/%3E%3Ccircle%20cx%3D%2274%22%20cy%3D%2250%22%20r%3D%224%22%20fill%3D%22%23F0A93A%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28452.0%2C356.0%29%22%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20rx%3D%2224%22%20fill%3D%22%23FBD9AC%22%20stroke%3D%22%23c4d0dd%22%20stroke-width%3D%223%22/%3E%3Cpath%20d%3D%22M48%2040l32%2020-32%2020z%22%20fill%3D%22%23F0A93A%22%20stroke%3D%22%23243240%22%20stroke-width%3D%226%22%20stroke-linejoin%3D%22round%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28598.0%2C356.0%29%22%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20rx%3D%2224%22%20fill%3D%22%23BBDCF4%22%20stroke%3D%22%23c4d0dd%22%20stroke-width%3D%223%22/%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2246%22%20r%3D%2213%22%20fill%3D%22%237FB2E8%22%20stroke%3D%22%23243240%22%20stroke-width%3D%226%22/%3E%3Cpath%20d%3D%22M36%2086c0-15%2011-24%2024-24s24%209%2024%2024z%22%20fill%3D%22%237FB2E8%22%20stroke%3D%22%23243240%22%20stroke-width%3D%226%22%20stroke-linejoin%3D%22round%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28306.0%2C502.0%29%22%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20rx%3D%2224%22%20fill%3D%22%23BBDCF4%22%20stroke%3D%22%23c4d0dd%22%20stroke-width%3D%223%22/%3E%3Cpath%20d%3D%22M30%2040h60a8%208%200%200%201%208%208v22a8%208%200%200%201-8%208H58l-14%2012V78h-14a8%208%200%200%201-8-8V48a8%208%200%200%201%208-8z%22%20fill%3D%22%23fff%22%20stroke%3D%22%23243240%22%20stroke-width%3D%226%22%20stroke-linejoin%3D%22round%22/%3E%3Ccircle%20cx%3D%2248%22%20cy%3D%2258%22%20r%3D%224%22%20fill%3D%22%23243240%22/%3E%3Ccircle%20cx%3D%2272%22%20cy%3D%2258%22%20r%3D%224%22%20fill%3D%22%23243240%22/%3E%3Cpath%20d%3D%22M48%2066a14%208%200%200%200%2024%200%22%20fill%3D%22none%22%20stroke%3D%22%23243240%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28452.0%2C502.0%29%22%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20rx%3D%2224%22%20fill%3D%22%23CDE9C4%22%20stroke%3D%22%23c4d0dd%22%20stroke-width%3D%223%22/%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2246%22%20r%3D%2213%22%20fill%3D%22%236BA84F%22%20stroke%3D%22%23243240%22%20stroke-width%3D%226%22/%3E%3Cpath%20d%3D%22M36%2086c0-15%2011-24%2024-24s24%209%2024%2024z%22%20fill%3D%22%236BA84F%22%20stroke%3D%22%23243240%22%20stroke-width%3D%226%22%20stroke-linejoin%3D%22round%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28598.0%2C502.0%29%22%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20rx%3D%2224%22%20fill%3D%22%23F6C9DC%22%20stroke%3D%22%23c4d0dd%22%20stroke-width%3D%223%22/%3E%3Cpath%20d%3D%22M60%2084C40%2072%2032%2060%2032%2048c0-9%207-15%2015-15%206%200%2011%204%2013%208%202-4%207-8%2013-8%208%200%2015%206%2015%2015%200%2012-8%2024-28%2036z%22%20fill%3D%22%23E8736A%22%20stroke%3D%22%23243240%22%20stroke-width%3D%226%22%20stroke-linejoin%3D%22round%22/%3E%3C/g%3E%20%3Ctext%20x%3D%22392%22%20y%3D%22930%22%20font-family%3D%22DejaVu%20Sans%2C%20Arial%2C%20sans-serif%22%20font-weight%3D%22bold%22%20font-size%3D%22170%22%20fill%3D%22%23F4C740%22%20stroke%3D%22%23E0A92E%22%20stroke-width%3D%224%22%3EA%3C/text%3E%20%3C/svg%3E" alt="pričAjmo logo"></span>
       <div>pričAjmo<small>komunikacijske ploče i piktogrami</small></div>
     </div>
-    <div class="board-name">
+    <div class="board-name edit-only">
       <input id="boardName" type="text" value="Nova ploča" maxlength="60" title="Naziv ploče">
     </div>
-    <span class="save-state" id="saveState">Nije spremljeno</span>
+    <span class="save-state edit-only" id="saveState">Nije spremljeno</span>
     <div class="spacer"></div>
     <div class="top-actions">
       <button class="btn ghost sm" id="btnInfo" title="O aplikaciji i piktogramima">
@@ -264,13 +289,14 @@
       <button class="btn ghost sm" id="btnFeedback" title="Pošalji povratne informacije">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 7l8 6 8-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
+      <button class="btn" id="btnMode" title="Prebaci između uređivanja i komunikacije"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-14 9z" stroke-linejoin="round"/></svg><span id="btnModeLabel">Komunikacija</span></button>
       <button class="btn" id="btnInstall" style="display:none" title="Instaliraj aplikaciju na uređaj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round"/></svg>Instaliraj</button>
-      <button class="btn" id="btnTemplatesTop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Predlošci</button>
-      <button class="btn" id="btnNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>Nova</button>
-      <button class="btn" id="btnDeleteBoard" title="Izbriši trenutnu ploču"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke-linecap="round" stroke-linejoin="round"/></svg>Izbriši</button>
-      <button class="btn primary" id="btnSave"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11l3 3v13H5z" stroke-linejoin="round"/><path d="M8 4v5h7M8 14h8" stroke-linecap="round"/></svg>Spremi</button>
+      <button class="btn edit-only" id="btnTemplatesTop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Predlošci</button>
+      <button class="btn edit-only" id="btnNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>Nova</button>
+      <button class="btn edit-only" id="btnDeleteBoard" title="Izbriši trenutnu ploču"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke-linecap="round" stroke-linejoin="round"/></svg>Izbriši</button>
+      <button class="btn primary edit-only" id="btnSave"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11l3 3v13H5z" stroke-linejoin="round"/><path d="M8 4v5h7M8 14h8" stroke-linecap="round"/></svg>Spremi</button>
       <div class="menu-wrap">
-        <button class="btn" id="btnExport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 7l4-4 4 4M5 15v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Izvoz</button>
+        <button class="btn edit-only" id="btnExport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 7l4-4 4 4M5 15v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Izvoz</button>
         <div class="menu" id="exportMenu">
           <div class="mlabel">Izvezi cijelu ploču</div>
           <button data-act="print"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M8 14h8v6H8z" stroke-linejoin="round"/></svg>Ispis / PDF</button>
@@ -337,6 +363,19 @@
     </aside>
 
     <main class="center">
+      <div id="useBar" class="no-print">
+        <div class="ub-nav">
+          <button id="ubBack" title="Natrag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button id="ubHome" title="Početna ploča"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11l8-7 8 7M6 10v9h12v-9" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <span class="ub-name" id="ubName"></span>
+        </div>
+        <div class="ub-sent" id="ubSent"></div>
+        <div class="ub-actions">
+          <button id="ubSpeak" class="primary" title="Izgovori poruku"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H3v6h3l5 4z" stroke-linejoin="round"/><path d="M16 9a4 4 0 0 1 0 6M19 7a7 7 0 0 1 0 10" stroke-linecap="round"/></svg>Izgovori</button>
+          <button id="ubBackspace" title="Obriši zadnje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6h11v12H9l-6-6z" stroke-linejoin="round"/><path d="M16 10l-4 4M12 10l4 4" stroke-linecap="round"/></svg></button>
+          <button id="ubClear" title="Očisti poruku">Očisti</button>
+        </div>
+      </div>
       <div class="canvas-toolbar no-print">
         <div class="ct-group">
           <span class="ct-label">Raspored</span>
@@ -408,6 +447,10 @@
           <div class="field">
             <label>Kategorija (Fitzgeraldov ključ)</label>
             <select id="cellCat"></select>
+          </div>
+          <div class="field">
+            <label>Poveži s pločom <span style="color:var(--muted);font-weight:400">(otvara se u načinu Komunikacija)</span></label>
+            <select id="cellLink"></select>
           </div>
           <div class="section">
             <label>Boja pozadine</label>
@@ -842,7 +885,7 @@ function newBoard(){
     borderW:2, cellRad:10, pageFmt:"fit", showTitle:true, imgFill:86, borderMode:"neutral", autoCat:false, cells:makeCells(rows*cols) };
 }
 function makeCells(n){ const a=[]; for(let i=0;i<n;i++) a.push(emptyCell()); return a; }
-function emptyCell(){ return { id:uid(), label:"", imgType:null, imgData:null, cat:null, color:null }; }
+function emptyCell(){ return { id:uid(), label:"", imgType:null, imgData:null, cat:null, color:null, link:null }; }
 function resizeCells(){
   const need=board.rows*board.cols;
   if(board.cells.length<need){ while(board.cells.length<need) board.cells.push(emptyCell()); }
@@ -864,6 +907,8 @@ function persist(){
   catch(e){ toast("Spremanje nije uspjelo — moguće je da je prostor preglednika pun.","err"); return false; }
 }
 let dirty=false;
+/* Komunikacijski (use) način rada */
+let useMode=false, editBackup=null, navStack=[], sentence=[];
 function markDirty(){ dirty=true; updateSaveState(); scheduleCommit(); }
 function updateSaveState(){ const el=$("#saveState"); if(!board) return;
   el.innerHTML = dirty ? "Nespremljene promjene" : "<b>Spremljeno</b>"; }
@@ -926,6 +971,7 @@ function renderBoard(){
     else { inner+='<div class="cimg"></div>'; }
     if(board.labelPos!=="none"){ inner+='<div class="clab">'+esc(c.label)+'</div>'; }
     if(hasContent){ inner+='<button class="cdel" title="Isprazni polje" data-del="'+i+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/></svg></button>'; }
+    if(c.link){ inner+='<span class="linkbadge" title="Vodi na drugu ploču"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke-linejoin="round"/></svg></span>'; }
     cell.innerHTML=inner;
     grid.appendChild(cell);
   });
@@ -937,6 +983,7 @@ function renderBoard(){
 function bindCellEvents(){
   $$(".cell",$("#grid")).forEach(function(cell){
     const i=+cell.dataset.i;
+    if(useMode){ cell.addEventListener("click",function(){ useCellTap(i); }); return; }
     cell.addEventListener("click",function(e){ if(e.target.closest("[data-del]")) return; const mode=(e.ctrlKey||e.metaKey)?"toggle":(e.shiftKey?"range":null); selectCell(i,mode); });
     cell.addEventListener("dragstart",function(e){ e.dataTransfer.setData("text/cell",String(i)); e.dataTransfer.effectAllowed="move"; cell.classList.add("dragging"); });
     cell.addEventListener("dragend",function(){ cell.classList.remove("dragging"); });
@@ -946,7 +993,84 @@ function bindCellEvents(){
       const from=e.dataTransfer.getData("text/cell"); const pic=e.dataTransfer.getData("text/picto");
       if(from!==""){ swapCells(+from,i); } else if(pic!==""){ try{ placePictoData(JSON.parse(pic),i); selectCell(i); }catch(_){} } });
   });
-  $$("[data-del]",$("#grid")).forEach(function(b){ b.addEventListener("click",function(e){ e.stopPropagation(); clearCell(+b.dataset.del); }); });
+  if(!useMode){ $$("[data-del]",$("#grid")).forEach(function(b){ b.addEventListener("click",function(e){ e.stopPropagation(); clearCell(+b.dataset.del); }); }); }
+}
+
+/* ============================================================
+   KOMUNIKACIJSKI NAČIN (use mode): navigacija + rečenična traka
+   ============================================================ */
+function setMode(on){
+  if(on===useMode) return;
+  if(on){
+    const start=function(){
+      if(!store.boards[board.id]) saveBoard(true);
+      editBackup=board;
+      useMode=true; document.body.classList.add("use-mode");
+      navStack=[board.id]; sentence=[];
+      clearSelection();
+      board=JSON.parse(JSON.stringify(store.boards[board.id]));
+      $("#boardName").readOnly=true;
+      updateModeBtn(); renderBoard(); renderUseBar();
+    };
+    if(dirty){ confirmDlg("Uđi u način Komunikacija?","Trenutnu ploču treba spremiti prije ulaska. Spremiti sada?","Spremi i nastavi",false).then(function(ok){ if(!ok) return; saveBoard(true); start(); }); }
+    else start();
+  } else {
+    useMode=false; document.body.classList.remove("use-mode");
+    board=editBackup||board; editBackup=null; navStack=[]; sentence=[];
+    $("#boardName").readOnly=false;
+    clearSelection(); updateModeBtn(); renderBoard(); renderCellProps();
+  }
+}
+function updateModeBtn(){
+  const lab=$("#btnModeLabel"); const b=$("#btnMode");
+  if(!lab||!b) return;
+  if(useMode){ lab.textContent="Uređivanje"; b.classList.add("primary"); b.title="Natrag na uređivanje"; }
+  else { lab.textContent="Komunikacija"; b.classList.remove("primary"); b.title="Prebaci u način Komunikacija (pregled i navigacija)"; }
+}
+function loadNav(){
+  const id=navStack[navStack.length-1];
+  if(!store.boards[id]) return;
+  board=JSON.parse(JSON.stringify(store.boards[id]));
+  renderBoard(); renderUseBar();
+}
+function navTo(id){
+  if(!store.boards[id]){ toast("Povezana ploča nije pronađena.","err"); return; }
+  navStack.push(id); loadNav();
+}
+function navBack(){ if(navStack.length>1){ navStack.pop(); loadNav(); } }
+function navHome(){ if(navStack.length>1){ navStack=[navStack[0]]; loadNav(); } }
+function useCellTap(i){
+  const c=board.cells[i]; if(!c) return;
+  if(c.link){ if(store.boards[c.link]) navTo(c.link); else toast("Povezana ploča nije pronađena.","err"); return; }
+  if(c.imgData||c.label) addToSentence(c);
+}
+function addToSentence(c){ sentence.push({ label:c.label||"", imgType:c.imgType, imgData:c.imgData }); renderUseBar(); }
+function sentBackspace(){ sentence.pop(); renderUseBar(); }
+function sentClear(){ sentence=[]; renderUseBar(); }
+function speakSentence(){
+  const text=sentence.map(function(s){return s.label;}).filter(Boolean).join(" ");
+  if(!text){ return; }
+  if(!("speechSynthesis" in window)){ toast("Govor nije podržan na ovom uređaju.","err"); return; }
+  try{
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text); u.lang="hr-HR"; u.rate=0.95;
+    const vs=window.speechSynthesis.getVoices()||[];
+    const v=vs.find(function(x){ return /hr|croat/i.test(x.lang)||/croat/i.test(x.name); });
+    if(v) u.voice=v;
+    window.speechSynthesis.speak(u);
+  }catch(e){ toast("Govor trenutno nije dostupan.","err"); }
+}
+function renderUseBar(){
+  const nm=$("#ubName"); if(nm) nm.textContent=board.name||"";
+  const back=$("#ubBack"), home=$("#ubHome");
+  if(back) back.disabled=navStack.length<=1;
+  if(home) home.disabled=navStack.length<=1;
+  const wrap=$("#ubSent"); if(!wrap) return;
+  if(!sentence.length){ wrap.innerHTML='<span class="ub-empty">Dodirni polja za slaganje poruke…</span>'; return; }
+  wrap.innerHTML=sentence.map(function(s){
+    const img=s.imgData?('<div class="si-img">'+(s.imgType==="svg"?s.imgData:'<img src="'+s.imgData+'" alt="">')+'</div>'):'';
+    return '<div class="sent-item">'+img+'<div class="si-lab">'+esc(s.label||"")+'</div></div>';
+  }).join("");
 }
 function swapCells(a,b){ if(a===b) return; const t=board.cells[a]; board.cells[a]=board.cells[b]; board.cells[b]=t;
   if(selIdx===a) selIdx=b; else if(selIdx===b) selIdx=a; markDirty(); renderBoard(); renderCellProps(); }
@@ -984,8 +1108,18 @@ function renderCellProps(){
   $("#cpLab").textContent=c.label||"—";
   $("#cellLabel").value=c.label||"";
   $("#cellCat").value=c.cat||"";
+  fillCellLinkOptions(c);
   renderCellColors(c);
   $("#cellColorCustom").value=toHex(bg);
+}
+function fillCellLinkOptions(c){
+  const sel=$("#cellLink"); if(!sel) return;
+  let html='<option value="">(bez poveznice)</option>';
+  store.order.filter(function(id){return store.boards[id] && id!==board.id;}).forEach(function(id){
+    html+='<option value="'+id+'">'+esc(store.boards[id].name||"Ploča")+'</option>';
+  });
+  sel.innerHTML=html;
+  sel.value=c.link||"";
 }
 function applyToSelection(fn){ selSet.forEach(function(i){ if(board.cells[i]) fn(board.cells[i],i); }); markDirty(); renderBoard(); }
 function renderMultiColors(){
@@ -1830,6 +1964,14 @@ function wireEvents(){
 
   // info
   $("#btnInfo").onclick=function(){ $("#infoOverlay").classList.add("open"); };
+  $("#btnMode").onclick=function(){ setMode(!useMode); };
+  $("#ubBack").onclick=navBack;
+  $("#ubHome").onclick=navHome;
+  $("#ubSpeak").onclick=speakSentence;
+  $("#ubBackspace").onclick=sentBackspace;
+  $("#ubClear").onclick=sentClear;
+  updateModeBtn();
+  if("speechSynthesis" in window){ try{ window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged=function(){}; }catch(e){} }
   $("#btnFeedback").onclick=openFeedback;
   $("#infoFeedback").onclick=function(){ $("#infoOverlay").classList.remove("open"); openFeedback(); };
   $("#infoClose").onclick=function(){ $("#infoOverlay").classList.remove("open"); };
@@ -1907,6 +2049,7 @@ function wireEvents(){
   // cell props
   $("#cellLabel").addEventListener("input",function(e){ if(selIdx==null) return; const c=board.cells[selIdx]; c.label=e.target.value; $("#cpLab").textContent=e.target.value||"—"; if(maybeAutoCat(c)){ $("#cellCat").value=c.cat||""; const bg=c.color||(c.cat&&fitz[c.cat]?fitz[c.cat].color:"#fff"); $("#cellPreview").style.setProperty("--prev-bg",bg); $("#cellColorCustom").value=toHex(bg); } markDirty(); renderBoard(); });
   $("#cellCat").addEventListener("change",function(e){ if(selIdx==null) return; const c=board.cells[selIdx]; c.cat=e.target.value||null; if(c.cat&&fitz[c.cat]) c.color=fitz[c.cat].color; markDirty(); renderBoard(); renderCellProps(); });
+  $("#cellLink").addEventListener("change",function(e){ if(selIdx==null) return; board.cells[selIdx].link=e.target.value||null; markDirty(); renderBoard(); });
   $("#cellColorCustom").addEventListener("input",function(e){ if(selIdx==null) return; board.cells[selIdx].color=e.target.value; markDirty(); renderBoard(); renderCellProps(); });
   $("#cellClear").onclick=function(){ if(selIdx!=null) clearCell(selIdx); };
   $("#cellExport").onclick=function(){ if(selIdx!=null) exportCellPictogram(selIdx); };
@@ -1919,6 +2062,11 @@ function wireEvents(){
   document.addEventListener("keydown",function(e){
     const tag=(document.activeElement&&document.activeElement.tagName)||"";
     const inField=/INPUT|TEXTAREA|SELECT/.test(tag);
+    if(useMode){
+      if(e.key==="Escape"){ setMode(false); }
+      else if(e.key==="Backspace" && !inField){ e.preventDefault(); sentBackspace(); }
+      return;
+    }
     if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="z" && !inField){ e.preventDefault(); if(e.shiftKey) doRedo(); else doUndo(); return; }
     if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="y" && !inField){ e.preventDefault(); doRedo(); return; }
     if(inField) return;
