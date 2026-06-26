@@ -138,6 +138,20 @@
   .board-item .bdup{opacity:0;color:var(--muted);border:none;background:transparent;padding:4px;border-radius:6px;cursor:pointer}
   .board-item:hover .bdup{opacity:1}
   .board-item .bdup:hover{color:var(--accent-d);background:var(--accent-soft)}
+  .board-item .bfold{opacity:0;color:var(--muted);border:none;background:transparent;padding:4px;border-radius:6px;cursor:pointer}
+  .board-item:hover .bfold{opacity:1}
+  .board-item .bfold:hover{color:var(--accent-d);background:var(--accent-soft)}
+  .board-item .bfold svg,.board-item .bdup svg,.board-item .bdel svg{width:17px;height:17px;display:block}
+  .folder-head{display:flex;align-items:center;gap:7px;padding:8px 9px;background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:7px}
+  .folder-head button{border:none;background:transparent;color:var(--muted);cursor:pointer;padding:3px;border-radius:6px;display:flex}
+  .folder-head .fold-toggle svg{width:16px;height:16px;transition:transform .12s}
+  .folder-head .fold-ic{width:17px;height:17px;color:var(--accent-d);flex-shrink:0}
+  .folder-head .fold-name{flex:1;font-weight:700;font-size:13px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .folder-head .fold-count{font-size:11px;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:20px;padding:1px 8px;flex-shrink:0}
+  .folder-head .fold-ren:hover,.folder-head .fold-del:hover{background:#fff;color:var(--ink)}
+  .folder-body{padding:0 0 2px 8px;border-left:2px solid var(--line);margin:0 0 9px 7px}
+  .fold-empty{font-size:12px;color:var(--muted);padding:7px 4px}
+  .ungrouped-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;margin:8px 0 7px}
 
   .center{flex:1;display:flex;flex-direction:column;min-width:0;background:
     radial-gradient(circle at 1px 1px,rgba(100,116,139,.13) 1px,transparent 0);
@@ -158,7 +172,8 @@
   .page-title.hidden{display:none}
   .grid{display:grid;gap:var(--gap,10px)}
   .cell{border:var(--cell-bw,2px) solid var(--cell-bc,#d7dde6);border-radius:var(--cell-r,10px);background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:box-shadow .1s,border-color .1s;cursor:pointer;min-height:0}
-  .linkbadge{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:6px;background:rgba(45,109,170,.92);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.25);z-index:2}
+  .linkbadge{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:6px;background:rgba(45,109,170,.92);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.25);z-index:2;cursor:pointer;transition:transform .1s}
+  body:not(.use-mode) .linkbadge:hover{transform:scale(1.15);background:rgba(45,109,170,1)}
   .linkbadge svg{width:13px;height:13px}
   /* Komunikacijski (use) način */
   #useBar{display:none;align-items:center;gap:12px;padding:8px 14px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:nowrap}
@@ -371,8 +386,7 @@
         </div>
         <div class="ub-sent" id="ubSent"></div>
         <div class="ub-actions">
-          <button id="ubSpeak" class="primary" title="Izgovori poruku"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H3v6h3l5 4z" stroke-linejoin="round"/><path d="M16 9a4 4 0 0 1 0 6M19 7a7 7 0 0 1 0 10" stroke-linecap="round"/></svg>Izgovori</button>
-          <button id="ubBackspace" title="Obriši zadnje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6h11v12H9l-6-6z" stroke-linejoin="round"/><path d="M16 10l-4 4M12 10l4 4" stroke-linecap="round"/></svg></button>
+          <button id="ubBackspace" title="Obriši zadnje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6h11v12H9l-6-6z" stroke-linejoin="round"/><path d="M16 10l-4 4M12 10l4 4" stroke-linecap="round"/></svg>Obriši zadnje</button>
           <button id="ubClear" title="Očisti poruku">Očisti</button>
         </div>
       </div>
@@ -566,8 +580,8 @@
           <label>Stranica</label>
           <div class="field" style="margin-bottom:10px">
             <select id="pageFmt">
-              <option value="fit" selected>Prilagodi sadržaju</option>
-              <option value="a4p">A4 — uspravno</option>
+              <option value="fit">Prilagodi sadržaju</option>
+              <option value="a4p" selected>A4 — uspravno</option>
               <option value="a4l">A4 — položeno</option>
               <option value="letterp">Letter — uspravno</option>
               <option value="letterl">Letter — položeno</option>
@@ -787,7 +801,7 @@ const ARASAAC_IMG = function(id){ return "https://static.arasaac.org/pictograms/
 
 /* ---------- State ---------- */
 const LS_KEY = "aac_boards_v2";
-let store = { boards:{}, order:[], userTemplates:[] };
+let store = { boards:{}, order:[], userTemplates:[], folders:[] };
 let board = null;
 let selIdx = null;
 let selSet = new Set();
@@ -882,7 +896,7 @@ function newBoard(){
   const rows=3, cols=4;
   return { id:uid(), name:"Nova ploča", created:Date.now(), modified:Date.now(),
     rows:rows, cols:cols, cellW:120, cellH:120, gap:10, labelPos:"bottom", labSize:15,
-    borderW:2, cellRad:10, pageFmt:"fit", showTitle:true, imgFill:86, borderMode:"neutral", autoCat:false, cells:makeCells(rows*cols) };
+    borderW:2, cellRad:10, pageFmt:"a4p", showTitle:true, imgFill:86, borderMode:"neutral", autoCat:false, cells:makeCells(rows*cols) };
 }
 function makeCells(n){ const a=[]; for(let i=0;i<n;i++) a.push(emptyCell()); return a; }
 function emptyCell(){ return { id:uid(), label:"", imgType:null, imgData:null, cat:null, color:null, link:null }; }
@@ -898,12 +912,12 @@ function resizeCells(){
 function loadStore(){
   try{
     const raw=localStorage.getItem(LS_KEY);
-    if(raw){ const d=JSON.parse(raw); store.boards=d.boards||{}; store.order=d.order||[]; store.userTemplates=d.userTemplates||[];
+    if(raw){ const d=JSON.parse(raw); store.boards=d.boards||{}; store.order=d.order||[]; store.userTemplates=d.userTemplates||[]; store.folders=d.folders||[];
       if(d.fitz) fitz=Object.assign(JSON.parse(JSON.stringify(FITZ_DEFAULT)), d.fitz); }
   }catch(e){ console.warn("Učitavanje nije uspjelo", e); }
 }
 function persist(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({boards:store.boards, order:store.order, fitz:fitz, userTemplates:store.userTemplates})); return true; }
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({boards:store.boards, order:store.order, fitz:fitz, userTemplates:store.userTemplates, folders:store.folders})); return true; }
   catch(e){ toast("Spremanje nije uspjelo — moguće je da je prostor preglednika pun.","err"); return false; }
 }
 let dirty=false;
@@ -984,7 +998,7 @@ function bindCellEvents(){
   $$(".cell",$("#grid")).forEach(function(cell){
     const i=+cell.dataset.i;
     if(useMode){ cell.addEventListener("click",function(){ useCellTap(i); }); return; }
-    cell.addEventListener("click",function(e){ if(e.target.closest("[data-del]")) return; const mode=(e.ctrlKey||e.metaKey)?"toggle":(e.shiftKey?"range":null); selectCell(i,mode); });
+    cell.addEventListener("click",function(e){ if(e.target.closest("[data-del]")) return; if(e.target.closest(".linkbadge")){ e.stopPropagation(); jumpToLink(i); return; } const mode=(e.ctrlKey||e.metaKey)?"toggle":(e.shiftKey?"range":null); selectCell(i,mode); });
     cell.addEventListener("dragstart",function(e){ e.dataTransfer.setData("text/cell",String(i)); e.dataTransfer.effectAllowed="move"; cell.classList.add("dragging"); });
     cell.addEventListener("dragend",function(){ cell.classList.remove("dragging"); });
     cell.addEventListener("dragover",function(e){ e.preventDefault(); const ty=e.dataTransfer.types; if((ty.indexOf&&(ty.indexOf("text/cell")>=0||ty.indexOf("text/picto")>=0))||true) cell.classList.add("dragover"); });
@@ -1044,22 +1058,14 @@ function useCellTap(i){
   if(c.link){ if(store.boards[c.link]) navTo(c.link); else toast("Povezana ploča nije pronađena.","err"); return; }
   if(c.imgData||c.label) addToSentence(c);
 }
+function jumpToLink(i){
+  const c=board.cells[i]; if(!c||!c.link) return;
+  if(store.boards[c.link]) openBoard(c.link);
+  else toast("Povezana ploča nije pronađena.","err");
+}
 function addToSentence(c){ sentence.push({ label:c.label||"", imgType:c.imgType, imgData:c.imgData }); renderUseBar(); }
 function sentBackspace(){ sentence.pop(); renderUseBar(); }
 function sentClear(){ sentence=[]; renderUseBar(); }
-function speakSentence(){
-  const text=sentence.map(function(s){return s.label;}).filter(Boolean).join(" ");
-  if(!text){ return; }
-  if(!("speechSynthesis" in window)){ toast("Govor nije podržan na ovom uređaju.","err"); return; }
-  try{
-    window.speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(text); u.lang="hr-HR"; u.rate=0.95;
-    const vs=window.speechSynthesis.getVoices()||[];
-    const v=vs.find(function(x){ return /hr|croat/i.test(x.lang)||/croat/i.test(x.name); });
-    if(v) u.voice=v;
-    window.speechSynthesis.speak(u);
-  }catch(e){ toast("Govor trenutno nije dostupan.","err"); }
-}
 function renderUseBar(){
   const nm=$("#ubName"); if(nm) nm.textContent=board.name||"";
   const back=$("#ubBack"), home=$("#ubHome");
@@ -1478,26 +1484,112 @@ function boardThumb(b){
     h+='<i style="--c:'+col+'"></i>'; }
   return h;
 }
+function promptText(title, labelText, value, okLabel){
+  return new Promise(function(resolve){
+    const ov=document.createElement("div"); ov.className="overlay open";
+    ov.innerHTML='<div class="modal" style="max-width:380px"><h3>'+esc(title)+'</h3>'+
+      '<div class="field"><label>'+esc(labelText)+'</label><input type="text" id="ptInput" maxlength="60" value="'+esc(value||"")+'"></div>'+
+      '<div class="mactions"><button class="btn" data-x="cancel">Odustani</button><button class="btn primary" data-x="ok">'+esc(okLabel||"U redu")+'</button></div></div>';
+    document.body.appendChild(ov);
+    const inp=$("#ptInput",ov);
+    setTimeout(function(){ inp.focus(); inp.select(); },30);
+    function done(v){ ov.remove(); resolve(v); }
+    ov.addEventListener("click",function(e){ const x=e.target.dataset?e.target.dataset.x:null; if(e.target===ov||x==="cancel") done(null); else if(x==="ok") done((inp.value||"").trim()||null); });
+    inp.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); done((inp.value||"").trim()||null); } });
+  });
+}
+function createFolder(){
+  promptText("Nova mapa","Naziv mape","","Stvori mapu").then(function(name){
+    if(!name) return; store.folders.push({id:uid(), name:name}); persist(); renderBoardList(); toast("Mapa stvorena: "+name,"ok");
+  });
+}
+function renameFolder(id){
+  const f=store.folders.find(function(x){return x.id===id;}); if(!f) return;
+  promptText("Preimenuj mapu","Naziv mape",f.name,"Spremi").then(function(name){ if(!name) return; f.name=name; persist(); renderBoardList(); });
+}
+function deleteFolder(id){
+  const f=store.folders.find(function(x){return x.id===id;}); if(!f) return;
+  confirmDlg("Izbrisati mapu?","Mapa „"+(f.name||"")+"” bit će izbrisana. Ploče iz nje NEĆE biti izbrisane — samo premještene izvan mape.","Izbriši",true).then(function(ok){
+    if(!ok) return;
+    store.folders=store.folders.filter(function(x){return x.id!==id;});
+    Object.keys(store.boards).forEach(function(bid){ if(store.boards[bid].folderId===id) store.boards[bid].folderId=null; });
+    persist(); renderBoardList(); toast("Mapa izbrisana","ok");
+  });
+}
+function moveBoardToFolder(boardId, folderId){ if(!store.boards[boardId]) return; store.boards[boardId].folderId=folderId||null; persist(); renderBoardList(); }
+function openMoveToFolder(boardId){
+  const b=store.boards[boardId]; if(!b) return;
+  const cur=b.folderId||"";
+  let opts='<label class="mtf-row"><input type="radio" name="mtf" value=""'+(cur===""?" checked":"")+'><span>Bez mape</span></label>';
+  store.folders.forEach(function(f){ opts+='<label class="mtf-row"><input type="radio" name="mtf" value="'+f.id+'"'+(cur===f.id?" checked":"")+'><span>'+esc(f.name)+'</span></label>'; });
+  const ov=document.createElement("div"); ov.className="overlay open";
+  ov.innerHTML='<div class="modal" style="max-width:380px"><h3>Premjesti u mapu</h3>'+
+    '<p style="margin-bottom:12px">Ploča: <b>'+esc(b.name||"Ploča")+'</b></p>'+
+    '<style>.mtf-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin-bottom:7px;cursor:pointer}</style>'+
+    '<div style="max-height:40vh;overflow:auto">'+opts+'</div>'+
+    '<button class="btn sm" id="mtfNew" style="margin:2px 0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>Nova mapa…</button>'+
+    '<div class="mactions"><button class="btn" data-x="cancel">Odustani</button><button class="btn primary" data-x="ok">Premjesti</button></div></div>';
+  document.body.appendChild(ov);
+  $("#mtfNew",ov).onclick=function(){ promptText("Nova mapa","Naziv mape","","Stvori").then(function(name){ if(!name) return; const f={id:uid(),name:name}; store.folders.push(f); moveBoardToFolder(boardId,f.id); ov.remove(); toast("Premješteno u: "+name,"ok"); }); };
+  ov.addEventListener("click",function(e){
+    const x=e.target.dataset?e.target.dataset.x:null;
+    if(e.target===ov||x==="cancel"){ ov.remove(); return; }
+    if(x==="ok"){ const sel=ov.querySelector('input[name="mtf"]:checked'); moveBoardToFolder(boardId, sel?sel.value:""); ov.remove(); }
+  });
+}
+let foldersCollapsed={};
+function boardItemEl(id){
+  const b=store.boards[id];
+  const it=document.createElement("div");
+  it.className="board-item"+(board&&board.id===id?" active":"");
+  const d=new Date(b.modified||b.created);
+  const filled=b.cells.filter(function(c){return c.imgData||c.label;}).length;
+  it.innerHTML='<div class="bthumb">'+boardThumb(b)+'</div>'+
+    '<div class="binfo"><div class="bname">'+esc(b.name||"Ploča")+'</div>'+
+    '<div class="bmeta">'+b.cols+'×'+b.rows+' · '+filled+' polja · '+d.toLocaleDateString("hr-HR")+'</div></div>'+
+    '<button class="bfold" title="Premjesti u mapu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke-linejoin="round"/></svg></button>'+
+    '<button class="bdup" title="Dupliciraj ploču"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke-linecap="round"/></svg></button>'+
+    '<button class="bdel" title="Izbriši ploču"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+  it.addEventListener("click",function(e){ if(e.target.closest(".bdel")||e.target.closest(".bdup")||e.target.closest(".bfold")) return; openBoard(id); });
+  $(".bfold",it).addEventListener("click",function(e){ e.stopPropagation(); openMoveToFolder(id); });
+  $(".bdup",it).addEventListener("click",function(e){ e.stopPropagation(); duplicateBoard(id); });
+  $(".bdel",it).addEventListener("click",function(e){ e.stopPropagation(); deleteBoard(id); });
+  return it;
+}
 function renderBoardList(){
   const wrap=$("#boardList"); wrap.innerHTML="";
   const ids=store.order.filter(function(id){return store.boards[id];});
-  if(!ids.length){ wrap.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12" opacity=".5"/></svg>Još nema spremljenih ploča.<br>Klikni <b>Spremi</b> da pohraniš ovu ploču.</div>'; return; }
-  ids.forEach(function(id){
-    const b=store.boards[id];
-    const it=document.createElement("div");
-    it.className="board-item"+(board&&board.id===id?" active":"");
-    const d=new Date(b.modified||b.created);
-    const filled=b.cells.filter(function(c){return c.imgData||c.label;}).length;
-    it.innerHTML='<div class="bthumb">'+boardThumb(b)+'</div>'+
-      '<div class="binfo"><div class="bname">'+esc(b.name||"Ploča")+'</div>'+
-      '<div class="bmeta">'+b.cols+'×'+b.rows+' · '+filled+' polja · '+d.toLocaleDateString("hr-HR")+'</div></div>'+
-      '<button class="bdup" title="Dupliciraj ploču"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke-linecap="round"/></svg></button>'+
-      '<button class="bdel" title="Izbriši ploču"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
-    it.addEventListener("click",function(e){ if(e.target.closest(".bdel")||e.target.closest(".bdup")) return; openBoard(id); });
-    $(".bdup",it).addEventListener("click",function(e){ e.stopPropagation(); duplicateBoard(id); });
-    $(".bdel",it).addEventListener("click",function(e){ e.stopPropagation(); deleteBoard(id); });
-    wrap.appendChild(it);
+  const bar=document.createElement("div"); bar.style.cssText="margin-bottom:10px";
+  const nf=document.createElement("button"); nf.className="btn sm"; nf.style.cssText="width:100%;justify-content:center";
+  nf.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke-linejoin="round"/><path d="M12 11v5M9.5 13.5h5" stroke-linecap="round"/></svg>Nova mapa';
+  nf.onclick=createFolder; bar.appendChild(nf); wrap.appendChild(bar);
+  if(!ids.length){ const e=document.createElement("div"); e.className="empty"; e.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12" opacity=".5"/></svg>Još nema spremljenih ploča.<br>Klikni <b>Spremi</b> da pohraniš ovu ploču.'; wrap.appendChild(e); return; }
+  store.folders.forEach(function(f){
+    const inside=ids.filter(function(id){return store.boards[id].folderId===f.id;});
+    const collapsed=!!foldersCollapsed[f.id];
+    const head=document.createElement("div"); head.className="folder-head";
+    head.innerHTML='<button class="fold-toggle" title="Otvori/zatvori"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:rotate('+(collapsed?"-90deg":"0deg")+')"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+      '<svg class="fold-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke-linejoin="round"/></svg>'+
+      '<span class="fold-name">'+esc(f.name)+'</span><span class="fold-count">'+inside.length+'</span>'+
+      '<button class="fold-ren" title="Preimenuj mapu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16z" stroke-linejoin="round"/><path d="M13.5 6.5l4 4" stroke-linecap="round"/></svg></button>'+
+      '<button class="fold-del" title="Izbriši mapu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+    wrap.appendChild(head);
+    const toggle=function(){ foldersCollapsed[f.id]=!collapsed; renderBoardList(); };
+    $(".fold-toggle",head).onclick=toggle;
+    $(".fold-name",head).onclick=toggle;
+    $(".fold-ren",head).onclick=function(e){ e.stopPropagation(); renameFolder(f.id); };
+    $(".fold-del",head).onclick=function(e){ e.stopPropagation(); deleteFolder(f.id); };
+    if(!collapsed){
+      const body=document.createElement("div"); body.className="folder-body";
+      if(!inside.length){ const em=document.createElement("div"); em.className="fold-empty"; em.textContent="Prazna mapa — premjesti ploče ovamo gumbom mape."; body.appendChild(em); }
+      else inside.forEach(function(id){ body.appendChild(boardItemEl(id)); });
+      wrap.appendChild(body);
+    }
   });
+  const folderIds=store.folders.map(function(f){return f.id;});
+  const ungrouped=ids.filter(function(id){ const fid=store.boards[id].folderId; return !fid || folderIds.indexOf(fid)<0; });
+  if(store.folders.length && ungrouped.length){ const lbl=document.createElement("div"); lbl.className="ungrouped-label"; lbl.textContent="Bez mape"; wrap.appendChild(lbl); }
+  ungrouped.forEach(function(id){ wrap.appendChild(boardItemEl(id)); });
 }
 function openBoard(id, force){
   const go=function(){
@@ -1678,7 +1770,17 @@ const TEMPLATES = [
   { name:"Jutarnja rutina", cols:4, rows:2, items:["spavati","krevet","prati","WC","jesti","piti","škola","gotovo"] },
   { name:"Igra", cols:3, rows:3, items:["igrati","lopta","knjiga","auto","dati","više","ja","ti","gotovo"] },
   { name:"Ljudi i želje", cols:4, rows:3, items:["ja","ti","mama","tata","htjeti","voljeti","dati","pomozi mi","da","ne","molim","hvala"] },
-  { name:"Gdje / mjesto", cols:3, rows:3, items:["u","na","ispod","gore","dolje","ovdje","ispred","kuća","škola"] }
+  { name:"Gdje / mjesto", cols:3, rows:3, items:["u","na","ispod","gore","dolje","ovdje","ispred","kuća","škola"] },
+  { name:"Osnovne riječi (core)", cols:4, rows:3, items:["ja","ti","htjeti","više","ići","stati","dati","pomoći","da","ne","ovo","gotovo"] },
+  { name:"Radnje (glagoli)", cols:4, rows:3, items:["jesti","piti","ići","igrati","gledati","spavati","raditi","čitati","pisati","trčati","prati","dati"] },
+  { name:"Opisne riječi", cols:4, rows:2, items:["velik","malen","vruće","hladno","brz","prljav","sretan","tužan"] },
+  { name:"Pitanja", cols:3, rows:2, items:["što","gdje","tko","zašto","kada","koliko"] },
+  { name:"Boje", cols:2, rows:2, items:["crvena","plava","zelena","žuta"] },
+  { name:"Vrijeme (kada)", cols:3, rows:2, items:["sada","danas","sutra","jučer","poslije","čekati"] },
+  { name:"Kako se osjećam / pomoć", cols:4, rows:2, items:["bolestan","umoran","gladan","žedan","vruće","hladno","WC","pomozi mi"] },
+  { name:"Životinje i priroda", cols:3, rows:2, items:["riba","ptica","cvijet","drvo","sunce","voda"] },
+  { name:"Predmeti", cols:3, rows:2, items:["knjiga","lopta","auto","telefon","stolica","krevet"] },
+  { name:"Pozdravi i pristojnost", cols:3, rows:2, items:["bok","dobar dan","laku noć","molim","hvala","oprosti"] }
 ];
 function boardFromTemplate(t){
   const b=newBoard(); b.name=t.name; b.cols=t.cols; b.rows=t.rows; b.cells=makeCells(t.cols*t.rows);
@@ -1967,11 +2069,9 @@ function wireEvents(){
   $("#btnMode").onclick=function(){ setMode(!useMode); };
   $("#ubBack").onclick=navBack;
   $("#ubHome").onclick=navHome;
-  $("#ubSpeak").onclick=speakSentence;
   $("#ubBackspace").onclick=sentBackspace;
   $("#ubClear").onclick=sentClear;
   updateModeBtn();
-  if("speechSynthesis" in window){ try{ window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged=function(){}; }catch(e){} }
   $("#btnFeedback").onclick=openFeedback;
   $("#infoFeedback").onclick=function(){ $("#infoOverlay").classList.remove("open"); openFeedback(); };
   $("#infoClose").onclick=function(){ $("#infoOverlay").classList.remove("open"); };

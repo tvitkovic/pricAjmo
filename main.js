@@ -107,9 +107,16 @@ function createWindow () {
   mainWindow.on('close', (e) => {
     if (forceCloseApproved) return;
     e.preventDefault();
-    mainWindow.webContents.executeJavaScript('typeof dirty !== "undefined" ? !!dirty : false')
+    const closeNow = () => { forceCloseApproved = true; if (mainWindow) mainWindow.destroy(); };
+    // Provjera nespremljenih promjena uz vremensko ograničenje (da se zatvaranje
+    // nikad ne zaglavi ako je stranica zauzeta). destroy() zaobilazi beforeunload
+    // iz web stranice, koji bi inače mogao blokirati zatvaranje.
+    let settled = false;
+    const guard = setTimeout(() => { if (!settled) { settled = true; closeNow(); } }, 1500);
+    mainWindow.webContents.executeJavaScript('(typeof dirty !== "undefined" && dirty) ? 1 : 0')
       .then((isDirty) => {
-        if (!isDirty) { forceCloseApproved = true; mainWindow.close(); return; }
+        if (settled) return; settled = true; clearTimeout(guard);
+        if (!isDirty) { closeNow(); return; }
         dialog.showMessageBox(mainWindow, {
           type: 'warning',
           title: 'pričAjmo — nespremljene promjene',
@@ -117,12 +124,13 @@ function createWindow () {
           detail: 'Ako zatvoriš sada, te promjene će biti izgubljene.',
           buttons: ['Zatvori bez spremanja', 'Odustani'],
           cancelId: 1,
-          defaultId: 1
+          defaultId: 1,
+          noLink: true
         }).then((result) => {
-          if (result.response === 0) { forceCloseApproved = true; mainWindow.close(); }
-        });
+          if (result.response === 0) closeNow();
+        }).catch(() => closeNow());
       })
-      .catch(() => { forceCloseApproved = true; mainWindow.close(); });
+      .catch(() => { if (settled) return; settled = true; clearTimeout(guard); closeNow(); });
   });
 
   mainWindow.on('closed', () => { mainWindow = null; });
