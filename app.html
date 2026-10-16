@@ -111,18 +111,25 @@
   .lang-pick select{padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-size:12px;font-weight:600;color:var(--ink)}
 
   .cat-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-  .chip{font-size:11.5px;padding:5px 10px;border-radius:20px;border:1px solid var(--line);background:#fff;color:var(--muted);font-weight:600;display:inline-flex;align-items:center;gap:6px}
+  .chip{font-size:11px;padding:4px 9px;cursor:pointer;border-radius:20px;border:1px solid var(--line);background:#fff;color:var(--muted);font-weight:600;display:inline-flex;align-items:center;gap:6px}
   .chip .dot{width:9px;height:9px;border-radius:50%;border:1px solid rgba(0,0,0,.12)}
   .chip:hover{border-color:#cfd7e2;color:var(--ink)}
   .chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
   .chip.active .dot{border-color:rgba(255,255,255,.5)}
 
-  .picto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  .picto{border:1px solid var(--line);border-radius:10px;background:#fff;padding:7px 6px 6px;cursor:pointer;transition:.12s;text-align:center;position:relative;user-select:none}
+  .picto-grid{display:grid;grid-template-columns:repeat(var(--pcols,4),minmax(0,1fr));gap:6px}
+  #libResults,.side.left .tab-body{overflow-x:hidden}
+  .lib-sechd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:2px 0 8px}
+  .lib-sechd + .picto-grid{margin-bottom:14px}
+  .lib-size{display:flex;align-items:center;gap:6px;margin:-4px 0 10px;font-size:11px;color:var(--muted)}
+  .lib-size button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:3px 8px;font:inherit;font-size:11px;color:var(--muted);cursor:pointer}
+  .lib-size button.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-d);font-weight:700}
+  .lib-more{width:100%;justify-content:center;margin:2px 0 14px}
+  .picto{min-width:0;border:1px solid var(--line);border-radius:9px;background:#fff;padding:5px 4px 4px;cursor:pointer;transition:.12s;text-align:center;position:relative;user-select:none}
   .picto:hover{border-color:var(--accent);box-shadow:0 3px 10px rgba(13,148,136,.13);transform:translateY(-1px)}
   .picto .pim{width:100%;aspect-ratio:1/1;display:grid;place-items:center;border-radius:7px;overflow:hidden;margin-bottom:4px;background:var(--cat,#fff)}
   .picto .pim svg,.picto .pim img{width:88%;height:88%;object-fit:contain;display:block}
-  .picto .plab{font-size:11px;font-weight:600;color:var(--ink);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .picto .plab{font-size:10.5px;font-weight:600;color:var(--ink);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .picto .dl{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.92);border:1px solid var(--line);display:none;place-items:center;color:var(--muted)}
   .picto:hover .dl{display:grid}
   .picto .dl:hover{color:var(--accent-d);border-color:var(--accent)}
@@ -409,9 +416,12 @@
         </div>
         <div class="search-box">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4" stroke-linecap="round"/></svg>
-          <input id="searchInput" type="text" placeholder="Traži piktogram (ARASAAC)…">
+          <input id="searchInput" type="text" placeholder="Traži riječ ili kategoriju (npr. pored, prijedlozi)…">
         </div>
         <div class="cat-chips" id="catChips"></div>
+        <div class="lib-size" id="libSize">Veličina sličica:
+          <button data-pcols="5">Mala</button><button data-pcols="4">Srednja</button><button data-pcols="3">Velika</button>
+        </div>
         <div id="libResults"></div>
         <div class="section" style="margin-top:18px">
           <label>Vlastiti piktogram</label>
@@ -894,6 +904,44 @@ const BUILTIN = [
   {label:"gotovo", cat:"negation", svg:P('<path d="M30 24v52" stroke="'+OUT+'" stroke-width="5" stroke-linecap="round"/><rect x="34" y="26" width="40" height="28" fill="#fff" stroke="'+OUT+'" stroke-width="4"/><g fill="'+OUT+'"><rect x="34" y="26" width="10" height="7"/><rect x="54" y="26" width="10" height="7"/><rect x="44" y="33" width="10" height="7"/><rect x="64" y="33" width="10" height="7"/><rect x="34" y="40" width="10" height="7"/><rect x="54" y="40" width="10" height="7"/></g>')},
   {label:"nemoj", cat:"negation", svg:P('<path d="M30 56v-6c0-13 9-23 21-23s21 10 21 23v16a15 15 0 0 1-15 15H45a15 15 0 0 1-15-15z" fill="#F4A9A2" stroke="'+OUT+'" stroke-width="4.5" stroke-linejoin="round"/><path d="M38 40v18M48 36v22M58 40v18" stroke="'+OUT+'" stroke-width="3" stroke-linecap="round"/>')},
   {label:"ništa", cat:"negation", svg:P('<ellipse cx="50" cy="50" rx="20" ry="28" fill="none" stroke="'+OUT+'" stroke-width="7"/>')},
+  {label:"pored", cat:"preposition", svg:P('<rect x="18" y="40" width="36" height="36" rx="4" fill="none" stroke="'+OUT+'" stroke-width="5"/><circle cx="72" cy="64" r="10" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/>')},
+  {label:"iza", cat:"preposition", svg:P('<circle cx="62" cy="42" r="12" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><rect x="24" y="40" width="42" height="38" rx="4" fill="#fff" stroke="'+OUT+'" stroke-width="5"/>')},
+  {label:"iznad", cat:"preposition", svg:P('<rect x="26" y="60" width="48" height="18" rx="4" fill="none" stroke="'+OUT+'" stroke-width="5"/><circle cx="50" cy="22" r="9" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><path d="M50 34v20" stroke="#9AA6B2" stroke-width="3" stroke-dasharray="4 4"/>')},
+  {label:"između", cat:"preposition", svg:P('<rect x="10" y="38" width="24" height="38" rx="4" fill="none" stroke="'+OUT+'" stroke-width="5"/><rect x="66" y="38" width="24" height="38" rx="4" fill="none" stroke="'+OUT+'" stroke-width="5"/><circle cx="50" cy="57" r="9" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/>')},
+  {label:"unutra", cat:"preposition", svg:P('<path d="M24 40v34h52V40" fill="none" stroke="'+OUT+'" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="62" r="9" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><path d="M50 12v28M42 32l8 8 8-8" fill="none" stroke="#3FAE5A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>')},
+  {label:"vani", cat:"preposition", svg:P('<path d="M18 46v30h44V46" fill="none" stroke="'+OUT+'" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="80" cy="22" r="9" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><path d="M42 60L68 34M56 34h12v12" fill="none" stroke="#3FAE5A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>')},
+  {label:"oko", cat:"preposition", svg:P('<rect x="38" y="38" width="24" height="24" rx="4" fill="none" stroke="'+OUT+'" stroke-width="5"/><circle cx="50" cy="50" r="30" fill="none" stroke="#9AA6B2" stroke-width="3.5" stroke-dasharray="5 5"/><circle cx="80" cy="50" r="8" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><path d="M74 30l6 8 8-5" fill="none" stroke="#3FAE5A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>')},
+  {label:"kroz", cat:"preposition", svg:P('<path d="M28 78V50a22 22 0 0 1 44 0v28" fill="none" stroke="'+OUT+'" stroke-width="5" stroke-linejoin="round"/><path d="M10 66h76M78 59l8 7-8 7" fill="none" stroke="#3FAE5A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="66" r="8" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/>')},
+  {label:"blizu", cat:"preposition", svg:P('<rect x="20" y="40" width="34" height="36" rx="4" fill="none" stroke="'+OUT+'" stroke-width="5"/><circle cx="68" cy="64" r="9" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><path d="M54 88h14" stroke="#3FAE5A" stroke-width="3.5" stroke-linecap="round"/><path d="M58 84l-4 4 4 4M64 84l4 4-4 4" fill="none" stroke="#3FAE5A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>')},
+  {label:"daleko", cat:"preposition", svg:P('<rect x="8" y="46" width="24" height="30" rx="4" fill="none" stroke="'+OUT+'" stroke-width="5"/><circle cx="88" cy="66" r="8" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><path d="M36 86h44" stroke="#9AA6B2" stroke-width="3.5" stroke-dasharray="5 5" stroke-linecap="round"/><path d="M42 80l-6 6 6 6M74 80l6 6-6 6" fill="none" stroke="#3FAE5A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>')},
+  {label:"tamo", cat:"preposition", svg:P('<path d="M10 62h40M42 54l8 8-8 8" fill="none" stroke="#3FAE5A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M76 22c-9 0-15 6-15 15 0 11 15 27 15 27s15-16 15-27c0-9-6-15-15-15z" fill="#A6DDD3" stroke="'+OUT+'" stroke-width="4.5" stroke-linejoin="round"/><circle cx="76" cy="37" r="5" fill="#fff" stroke="'+OUT+'" stroke-width="3.5"/>')},
+  {label:"prema", cat:"preposition", svg:P('<circle cx="18" cy="58" r="9" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><path d="M32 58h22M46 50l8 8-8 8" fill="none" stroke="#3FAE5A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><rect x="62" y="38" width="28" height="40" rx="4" fill="none" stroke="'+OUT+'" stroke-width="5"/>')},
+  {label:"od", cat:"preposition", svg:P('<rect x="8" y="38" width="28" height="40" rx="4" fill="none" stroke="'+OUT+'" stroke-width="5"/><path d="M44 58h22M58 50l8 8-8 8" fill="none" stroke="#3FAE5A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="82" cy="58" r="9" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/>')},
+  {label:"do", cat:"preposition", svg:P('<circle cx="16" cy="62" r="9" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><path d="M30 62h28M50 54l8 8-8 8" fill="none" stroke="#3FAE5A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M72 82V20" stroke="'+OUT+'" stroke-width="5" stroke-linecap="round"/><path d="M72 22h20l-6 9 6 9H72z" fill="#F4C77E" stroke="'+OUT+'" stroke-width="4" stroke-linejoin="round"/>')},
+  {label:"sa", cat:"preposition", svg:P('<rect x="12" y="30" width="76" height="40" rx="20" fill="#EAF6F3" stroke="#9AA6B2" stroke-width="3"/><circle cx="32" cy="50" r="11" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><rect x="58" y="39" width="22" height="22" rx="3" fill="#F4C77E" stroke="'+OUT+'" stroke-width="4"/><path d="M46 50h6M49 47v6" fill="none" stroke="'+OUT+'" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>')},
+  {label:"bez", cat:"preposition", svg:P('<circle cx="26" cy="50" r="11" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><rect x="56" y="38" width="26" height="26" rx="3" fill="#F4C77E" stroke="'+OUT+'" stroke-width="4"/><path d="M52 34l34 34M86 34L52 68" fill="none" stroke="#E8473A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>')},
+  {label:"prije", cat:"adverb", svg:P('<circle cx="58" cy="50" r="24" fill="#FBE2A8" stroke="'+OUT+'" stroke-width="5"/><path d="M58 34v16l10 5" fill="none" stroke="'+OUT+'" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M30 50H16M23 44l-7 6 7 6" fill="none" stroke="#E8473A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>')},
+  {label:"opet", cat:"adverb", svg:P('<path d="M70 34a24 24 0 1 0 6 26" fill="none" stroke="'+OUT+'" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M62 22l10 12-14 4" fill="none" stroke="#3FAE5A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>')},
+  {label:"uvijek", cat:"adverb", svg:P('<path d="M50 50c-8-10-14-16-22-16a16 16 0 0 0 0 32c8 0 14-6 22-16s14-16 22-16a16 16 0 0 1 0 32c-8 0-14-6-22-16z" fill="none" stroke="'+OUT+'" stroke-width="6" stroke-linejoin="round"/>')},
+  {label:"nikad", cat:"negation", svg:P('<circle cx="50" cy="50" r="28" fill="#FBE2A8" stroke="'+OUT+'" stroke-width="5"/><path d="M50 34v16l10 5" fill="none" stroke="'+OUT+'" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 72 72 28" stroke="#E8473A" stroke-width="6" stroke-linecap="round"/>')},
+  {label:"polako", cat:"adverb", svg:P('<path d="M16 74h56c6 0 10-4 10-10" fill="none" stroke="'+OUT+'" stroke-width="5" stroke-linecap="round"/><circle cx="46" cy="54" r="18" fill="#F4C77E" stroke="'+OUT+'" stroke-width="5"/><circle cx="46" cy="54" r="9" fill="none" stroke="'+OUT+'" stroke-width="3.5"/><circle cx="46" cy="54" r="2.5" fill="'+OUT+'"/><path d="M76 62V44M84 60V46" stroke="'+OUT+'" stroke-width="4" stroke-linecap="round"/><circle cx="76" cy="42" r="3" fill="'+OUT+'"/><circle cx="84" cy="44" r="3" fill="'+OUT+'"/>')},
+  {label:"brzo", cat:"adverb", svg:P('<circle cx="64" cy="50" r="14" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><path d="M12 40h26M18 50h22M12 60h26" fill="none" stroke="#7FB2E8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>')},
+  {label:"malo", cat:"adverb", svg:P('<path d="M18 52h64a32 26 0 0 1-64 0z" fill="#fff" stroke="'+OUT+'" stroke-width="5" stroke-linejoin="round"/><circle cx="44" cy="58" r="6" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="3"/><circle cx="57" cy="60" r="6" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="3"/>')},
+  {label:"puno", cat:"adverb", svg:P('<circle cx="32" cy="46" r="6" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="3"/><circle cx="44" cy="40" r="6" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="3"/><circle cx="56" cy="40" r="6" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="3"/><circle cx="68" cy="46" r="6" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="3"/><circle cx="38" cy="34" r="6" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="3"/><circle cx="50" cy="30" r="6" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="3"/><circle cx="62" cy="34" r="6" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="3"/><circle cx="50" cy="46" r="6" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="3"/><circle cx="26" cy="52" r="6" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="3"/><circle cx="74" cy="52" r="6" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="3"/><path d="M18 52h64a32 26 0 0 1-64 0z" fill="#fff" stroke="'+OUT+'" stroke-width="5" stroke-linejoin="round"/>')},
+  {label:"lijevo", cat:"preposition", svg:P('<path d="M78 50H22M40 32L22 50l18 18" fill="none" stroke="'+OUT+'" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>')},
+  {label:"desno", cat:"preposition", svg:P('<path d="M22 50h56M60 32l18 18-18 18" fill="none" stroke="'+OUT+'" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>')},
+  {label:"u sredini", cat:"preposition", svg:P('<rect x="14" y="22" width="72" height="56" rx="4" fill="none" stroke="'+OUT+'" stroke-width="5"/><path d="M50 26v14M50 60v14M18 50h14M68 50h14" fill="none" stroke="#9AA6B2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="50" r="10" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/>')},
+  {label:"preko", cat:"preposition", svg:P('<rect x="38" y="52" width="24" height="26" rx="4" fill="none" stroke="'+OUT+'" stroke-width="5"/><path d="M14 76C20 30 80 30 86 76" fill="none" stroke="#9AA6B2" stroke-width="3.5" stroke-dasharray="5 5" stroke-linecap="round"/><path d="M78 70l8 6 2-10" fill="none" stroke="#3FAE5A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="32" r="9" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/>')},
+  {label:"nasuprot", cat:"preposition", svg:P('<rect x="22" y="43" width="56" height="14" rx="3" fill="#E9EEF3" stroke="'+OUT+'" stroke-width="4"/><circle cx="50" cy="24" r="9" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><circle cx="50" cy="76" r="9" fill="#F4C77E" stroke="'+OUT+'" stroke-width="4"/>')},
+  {label:"na vrhu", cat:"preposition", svg:P('<rect x="32" y="58" width="36" height="20" rx="4" fill="none" stroke="'+OUT+'" stroke-width="5"/><rect x="32" y="38" width="36" height="20" rx="4" fill="none" stroke="'+OUT+'" stroke-width="5"/><circle cx="50" cy="26" r="9" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/>')},
+  {label:"na dnu", cat:"preposition", svg:P('<path d="M30 16v62h40V16" fill="none" stroke="'+OUT+'" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="68" r="9" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/>')},
+  {label:"ili", cat:"determiner", svg:P('<path d="M12 50h20M32 50L54 30M32 50l22 20" fill="none" stroke="#3FAE5A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M46 28l8 2-1 8M46 72l8-2-1-8" fill="none" stroke="#3FAE5A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="72" cy="28" r="10" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><rect x="62" y="62" width="20" height="20" rx="3" fill="#F4C77E" stroke="'+OUT+'" stroke-width="4"/>')},
+  {label:"ali", cat:"determiner", svg:P('<circle cx="26" cy="56" r="11" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><rect x="64" y="46" width="20" height="20" rx="3" fill="#F4C77E" stroke="'+OUT+'" stroke-width="4"/><path d="M50 30v52" fill="none" stroke="#9AA6B2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 26l6 6 10-11" fill="none" stroke="#3FAE5A" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M66 20l14 14M80 20 66 34" fill="none" stroke="#E8473A" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>')},
+  {label:"jer", cat:"determiner", svg:P('<path d="M26 39l4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="#FFD15C" stroke="'+OUT+'" stroke-width="3.5" stroke-linejoin="round"/><path d="M70 52H42M50 44l-8 8 8 8" fill="none" stroke="#3FAE5A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="80" cy="52" r="10" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/>')},
+  {label:"zato", cat:"determiner", svg:P('<circle cx="20" cy="52" r="10" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><path d="M32 52h28M52 44l8 8-8 8" fill="none" stroke="#3FAE5A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M78 39l4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="#FFD15C" stroke="'+OUT+'" stroke-width="3.5" stroke-linejoin="round"/>')},
+  {label:"ako", cat:"determiner", svg:P('<circle cx="11" cy="50" r="7" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="3.5"/><path d="M19 50h7" fill="none" stroke="'+OUT+'" stroke-width="4" stroke-linecap="round"/><path d="M50 22l28 28-28 28-28-28z" fill="#fff" stroke="'+OUT+'" stroke-width="4.5" stroke-linejoin="round"/><path d="M42 42a8 8 0 1 1 11 7c-3 1.5-3 3.5-3 6.5" fill="none" stroke="'+OUT+'" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="64" r="3" fill="'+OUT+'"/><path d="M80 50h4" fill="none" stroke="#3FAE5A" stroke-width="4" stroke-linecap="round"/><rect x="84" y="43" width="14" height="14" rx="3" fill="#F4C77E" stroke="'+OUT+'" stroke-width="3.5"/>')},
+  {label:"pa", cat:"determiner", svg:P('<rect x="10" y="34" width="30" height="30" rx="4" fill="#fff" stroke="'+OUT+'" stroke-width="5"/><circle cx="25" cy="49" r="4" fill="'+OUT+'"/><path d="M46 49h12M52 43l6 6-6 6" fill="none" stroke="#3FAE5A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><rect x="62" y="34" width="30" height="30" rx="4" fill="#fff" stroke="'+OUT+'" stroke-width="5"/><circle cx="71" cy="49" r="4" fill="'+OUT+'"/><circle cx="83" cy="49" r="4" fill="'+OUT+'"/>')},
+  {label:"dok", cat:"determiner", svg:P('<circle cx="18" cy="32" r="9" fill="#7EC8F0" stroke="'+OUT+'" stroke-width="4"/><path d="M32 32h46M70 25l8 7-8 7" fill="none" stroke="#3FAE5A" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="9" y="58" width="18" height="18" rx="3" fill="#F4C77E" stroke="'+OUT+'" stroke-width="4"/><path d="M32 67h46M70 60l8 7-8 7" fill="none" stroke="#3FAE5A" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M88 22v56" fill="none" stroke="#9AA6B2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>')}
 ];
 
 /* ---------- ARASAAC ---------- */
@@ -945,14 +993,14 @@ const LEX = (function(){
   const m={};
   const add=function(cat,arr){ arr.forEach(function(w){ m[w]=cat; }); };
   add("pronoun",["ja","ti","on","ona","ono","mi","vi","oni","one","mene","tebe","njega","nje","nas","vas","sebe","ja sam","netko"]);
-  add("determiner",["moj","moja","moje","tvoj","tvoja","tvoje","naš","naša","vaš","njegov","njezin","ovaj","ova","ovo","taj","ta","to","onaj","ono","svaki","neki","i","ili","a","ali","pa","te","jedan","jedna"]);
+  add("determiner",["moj","moja","moje","tvoj","tvoja","tvoje","naš","naša","vaš","njegov","njezin","ovaj","ova","ovo","taj","ta","to","onaj","ono","svaki","neki","i","ili","a","ali","pa","te","jer","zato","ako","dok","nego","jedan","jedna"]);
   add("question",["što","šta","tko","ko","gdje","kamo","kada","kad","zašto","kako","koliko","koji","koja","koje","čiji","čija"]);
-  add("preposition",["u","na","o","od","do","za","sa","ka","iz","iza","ispod","ispred","iznad","pokraj","pored","kraj","među","kroz","niz","uz","po","pri","prema","bez","oko","preko","nad","pod","unutra","van"]);
+  add("preposition",["u","na","o","od","do","za","s","sa","ka","iz","iza","ispod","ispred","iznad","pokraj","pored","kraj","među","između","kroz","niz","uz","po","pri","prema","bez","oko","preko","nad","pod","unutra","van","vani","blizu","daleko","ovdje","tamo","ondje","gore","dolje","lijevo","desno","sredina","u sredini","nasuprot","na vrhu","na dnu"]);
   add("negation",["ne","ni","niti","nema","nije","nisam","nisi","nismo","niste","nemoj","nemojte","nikad","nikada","nigdje","ništa","nitko","nikakav","gotovo","kraj","stop"]);
-  add("adverb",["sada","sad","danas","sutra","jučer","poslije","prije","kasnije","uskoro","odmah","polako","opet","ponovno","ovdje","tamo","ondje","gore","dolje","više","manje","jako","vrlo","malo","puno","sporo"]);
+  add("adverb",["sada","sad","danas","sutra","jučer","poslije","prije","kasnije","uskoro","odmah","polako","brzo","opet","ponovno","uvijek","više","manje","jako","vrlo","malo","puno","sporo"]);
   add("social",["da","bok","zdravo","pozdrav","hvala","molim","oprosti","izvoli","doviđenja","volim","laku noć","dobar dan","dobro jutro","pomozi mi","ok","može"]);
   add("verb",["hoću","želim","idem","jedem","pijem","spavam","dođi","daj","gledaj","slušaj","sjedni","ustani","stani","čekaj","piši","crtaj","reži","složi","spremi","nizati","kuhaj","pleši","trči","skini","obuci","obuj"]);
-  add("adjective",["velik","veliki","mali","malen","dobar","loš","lijep","ružan","vruć","vruće","hladan","hladno","topao","brz","brzo","spor","čist","prljav","sretan","tužan","ljut","umoran","gladan","žedan","bolestan","nov","novi","star","stari","težak","lagan",
+  add("adjective",["velik","veliki","mali","malen","dobar","loš","lijep","ružan","vruć","vruće","hladan","hladno","topao","brz","spor","čist","prljav","sretan","tužan","ljut","umoran","gladan","žedan","bolestan","nov","novi","star","stari","težak","lagan",
     "crvena","crveno","crven","plava","plavo","plav","zelena","zeleno","zelen","žuta","žuto","žut","crna","crno","bijela","bijelo","smeđa","narančasta","ljubičasta","roza","ružičasta","siva"]);
   return m;
 })();
@@ -1027,10 +1075,36 @@ function newBoard(){
 }
 function makeCells(n){ const a=[]; for(let i=0;i<n;i++) a.push(emptyCell()); return a; }
 function emptyCell(){ return { id:uid(), label:"", imgType:null, imgData:null, cat:null, color:null, link:null, imgPos:null, labSize:null }; }
-function resizeCells(){
-  const need=board.rows*board.cols;
-  if(board.cells.length<need){ while(board.cells.length<need) board.cells.push(emptyCell()); }
-  else if(board.cells.length>need){ board.cells.length=need; if(selIdx!=null && selIdx>=need) selIdx=null; selSet.forEach(function(i){ if(i>=need) selSet.delete(i); }); }
+/* Promjena dimenzija čuva položaj (red, stupac) svakog polja.
+   Polja koja ispadnu izvan ploče NE brišu se: spremaju se u board.stash i
+   vraćaju na isto mjesto čim se ploča ponovno poveća. */
+function cellHasContent(c){ return !!(c && (c.imgData||c.label||c.color||c.cat||c.link)); }
+function resizeCells(oldCols, oldRows){
+  const nc=board.cols, nr=board.rows;
+  if(oldCols==null||oldRows==null){ oldCols=nc; oldRows=Math.ceil(board.cells.length/Math.max(1,nc)); }
+  const stash=board.stash||{};
+  const old=board.cells, out=[];
+  let hidden=0, restored=0;
+  for(let r=0;r<nr;r++){
+    for(let c=0;c<nc;c++){
+      let cell=(r<oldRows && c<oldCols) ? old[r*oldCols+c] : null;
+      const key=r+","+c;
+      if((!cell || !cellHasContent(cell)) && stash[key]){ cell=stash[key]; delete stash[key]; restored++; }
+      out.push(cell||emptyCell());
+    }
+  }
+  for(let r=0;r<oldRows;r++){
+    for(let c=0;c<oldCols;c++){
+      if(r<nr && c<nc) continue;
+      const cell=old[r*oldCols+c];
+      if(cellHasContent(cell)){ stash[r+","+c]=cell; hidden++; }
+    }
+  }
+  board.cells=out;
+  board.stash=Object.keys(stash).length?stash:undefined;
+  clearSelection();
+  if(hidden) toast(hidden+(hidden===1?" polje je privremeno skriveno":" polja su privremeno skrivena")+" — povećaj ploču da se vrate.");
+  else if(restored) toast("Vraćeno skrivenih polja: "+restored,"ok");
 }
 
 /* ============================================================
@@ -1085,18 +1159,32 @@ function applyPageFormat(){
 }
 /* Papir pri ispisu mora točno odgovarati formatu ploče, bez dodatnih rubova
    preglednika (inače se sadržaj prelijeva na drugu stranicu). */
+function pageSizeFor(fmt){
+  switch(fmt){
+    case "a4p": return "210mm 297mm";
+    case "a4l": return "297mm 210mm";
+    case "letterp": return "215.9mm 279.4mm";
+    case "letterl": return "279.4mm 215.9mm";
+  }
+  return null;
+}
+const PX2MM = 25.4/96;
 function setPageSizeRule(fmt){
   const el=document.getElementById("pageSizeRule"); if(!el) return;
-  let size;
-  switch(fmt){
-    case "a4p": size="210mm 297mm"; break;
-    case "a4l": size="297mm 210mm"; break;
-    case "letterp": size="215.9mm 279.4mm"; break;
-    case "letterl": size="279.4mm 215.9mm"; break;
-    default: size="auto";
+  let size=pageSizeFor(fmt);
+  if(!size){
+    // „Prilagodi sadržaju”: papir = točno veličina ploče (jedna ploča = jedna stranica, ništa odrezano)
+    // računa se iz same mreže (ne iz okvira stranice, koji se pri ispisu razvuče na širinu papira)
+    const g=board.gap||0, pad=28;
+    const t=document.getElementById("pageTitle");
+    const titleH=(t && !t.classList.contains("hidden")) ? (t.offsetHeight+16) : 0;
+    const w=pad*2 + board.cols*board.cellW + (board.cols-1)*g;
+    const h=pad*2 + titleH + board.rows*board.cellH + (board.rows-1)*g;
+    size=(Math.ceil(w*PX2MM)+1)+"mm "+(Math.ceil(h*PX2MM)+2)+"mm";
   }
   el.textContent="@page{size:"+size+";margin:0}";
 }
+function updatePrintPageSize(){ if(board && !document.body.classList.contains("multi-print")) setPageSizeRule(board.pageFmt); }
 function applyFillPageSizing(){
   const page=$("#page"), grid=$("#grid"), title=$("#pageTitle");
   const pad=30;
@@ -1123,6 +1211,7 @@ function imgMarkup(c){
 
 function renderBoard(){
   if(!board) return;
+  setTimeout(updatePrintPageSize,0);
   const grid=$("#grid"); applyPageFormat();
   const title=$("#pageTitle"); title.textContent=board.name||"";
   title.className="page-title"+((board.showTitle&&board.name)?"":" hidden");
@@ -1414,6 +1503,14 @@ function targetCell(){
    ============================================================ */
 function pictoFromBuiltin(b){ return { label:b.label, cat:b.cat, imgType:"svg", imgData:b.svg }; }
 
+/* Kratki, jasni nazivi kategorija u filtrima (ako korisnik nije sam preimenovao kategoriju) */
+const CHIP_NAMES = { pronoun:"Osobe", verb:"Glagoli", noun:"Imenice", adjective:"Opisne riječi", social:"Društvene",
+  question:"Pitanja", preposition:"Prijedlozi i mjesto", adverb:"Prilozi", determiner:"Veznici i ostalo", negation:"Negacija" };
+function chipName(k){
+  const def=FITZ_DEFAULT[k], cur=fitz[k];
+  if(def && cur && cur.label===def.label && CHIP_NAMES[k]) return CHIP_NAMES[k];
+  return (cur&&cur.label||k).split(" / ")[0];
+}
 function renderCatChips(){
   const wrap=$("#catChips"); wrap.innerHTML="";
   const mk=function(key,label){
@@ -1421,11 +1518,11 @@ function renderCatChips(){
     ch.className="chip"+(libCat===key?" active":"");
     if(key==="all") ch.textContent="Sve";
     else ch.innerHTML='<span class="dot" style="background:'+fitz[key].color+'"></span>'+label;
-    ch.onclick=function(){ libCat=key; renderCatChips(); renderBuiltin(); };
+    ch.onclick=function(){ libCat=key; const si=$("#searchInput"); if(si.value){ si.value=""; searchSeq++; } renderCatChips(); renderBuiltin(); };
     wrap.appendChild(ch);
   };
   mk("all");
-  FITZ_ORDER.forEach(function(k){ if(BUILTIN.some(function(b){return b.cat===k;})) mk(k, fitz[k].label.split(" / ")[0]); });
+  FITZ_ORDER.forEach(function(k){ if(BUILTIN.some(function(b){return b.cat===k;})) mk(k, chipName(k)); });
 }
 
 function pictoCard(opts){
@@ -1474,16 +1571,58 @@ function renderBuiltin(){
   const grid=document.createElement("div"); grid.className="picto-grid";
   list.forEach(function(b){ grid.appendChild(pictoCard(b)); });
   box.innerHTML="";
-  const hd=document.createElement("div");
-  hd.style.cssText="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:9px";
-  hd.textContent="Ugrađeni piktogrami ("+list.length+")";
+  const hd=document.createElement("div"); hd.className="lib-sechd";
+  hd.textContent=(libCat==="all"?"Ugrađeni piktogrami":chipName(libCat))+" ("+list.length+")";
   box.appendChild(hd); box.appendChild(grid);
+}
+
+/* ---------- Pretraga: ugrađeni (odmah, i za 1 slovo) + kategorije + ARASAAC ---------- */
+function normWord(t){ return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").trim(); }
+const CAT_ALIASES = {
+  pronoun:["zamjenic","osob","ljudi"], verb:["glagol","radnj"], noun:["imenic","predmet","stvari"],
+  adjective:["pridjev","opisn"], social:["drustv","pozdrav","pristojn"], question:["pitanj"],
+  preposition:["prijedl","mjest","prostor","polozaj","smjer","odnos"], adverb:["prilog","prilozi","vrijem","kolicin","nacin"],
+  negation:["negacij","nijek"], determiner:["veznik","veznic","ostalo"]
+};
+function searchBuiltins(q){
+  const nq=normWord(q);
+  const starts=[], contains=[];
+  BUILTIN.forEach(function(b){ const nl=normWord(b.label); if(nl.indexOf(nq)===0) starts.push(b); else if(nq.length>=2 && nl.indexOf(nq)>0) contains.push(b); });
+  starts.sort(function(a,b){ return normWord(a.label).length-normWord(b.label).length; });
+  const cats=[];
+  if(nq.length>=3){ Object.keys(CAT_ALIASES).forEach(function(k){
+    if(CAT_ALIASES[k].some(function(a){ return a.indexOf(nq)===0 || nq.indexOf(a)===0; }) || normWord(chipName(k)).indexOf(nq)===0) cats.push(k);
+  }); }
+  return { words:starts.concat(contains), cats:cats };
+}
+function runSearch(q){
+  const box=$("#libResults"); box.innerHTML="";
+  const res=searchBuiltins(q);
+  const addSection=function(title,list){
+    const hd=document.createElement("div"); hd.className="lib-sechd"; hd.textContent=title+" ("+list.length+")";
+    const grid=document.createElement("div"); grid.className="picto-grid";
+    list.forEach(function(b){ grid.appendChild(pictoCard(b)); });
+    box.appendChild(hd); box.appendChild(grid);
+  };
+  if(res.words.length) addSection("Ugrađeni piktogrami", res.words);
+  res.cats.forEach(function(k){ addSection("Kategorija: "+chipName(k), BUILTIN.filter(function(b){return b.cat===k;})); });
+  const ar=document.createElement("div"); ar.id="arasaacResults"; box.appendChild(ar);
+  if(normWord(q).length>=2) doSearch(q);
+  else ar.innerHTML='<div style="font-size:11.5px;color:var(--muted);padding:4px 2px 10px">Upiši barem 2 slova za pretragu ARASAAC baze.</div>';
+}
+
+/* Veličina sličica u knjižnici (pamti se) */
+function applyLibSize(n){
+  n=[3,4,5].indexOf(+n)>=0?+n:4;
+  document.documentElement.style.setProperty("--pcols", n);
+  $$("#libSize button").forEach(function(b){ b.classList.toggle("active", +b.dataset.pcols===n); });
+  try{ localStorage.setItem("aac_lib_cols", String(n)); }catch(e){}
 }
 
 /* ---- ARASAAC pretraga ---- */
 let searchSeq=0;
 const doSearch = debounce(function(q){
-  const box=$("#libResults");
+  const box=$("#arasaacResults"); if(!box) return;
   const lang=$("#searchLang").value;
   const seq=++searchSeq;
   box.innerHTML='<div class="loading"><div class="spin"></div>Tražim „'+esc(q)+'” …</div>';
@@ -1491,20 +1630,28 @@ const doSearch = debounce(function(q){
     .then(function(r){ if(!r.ok) throw new Error("net"); return r.json(); })
     .then(function(arr){
       if(seq!==searchSeq) return;
-      if(!arr || !arr.length){ box.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4" stroke-linecap="round"/></svg>Nema rezultata za „'+esc(q)+'”.<br>Pokušaj drugu riječ ili promijeni jezik pretrage.</div>'; return; }
+      if(!arr || !arr.length){ if($("#libResults .picto")){ box.innerHTML='<div style="font-size:11.5px;color:var(--muted);padding:4px 2px 10px">ARASAAC: nema rezultata za „'+esc(q)+'”.</div>'; return; } box.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4" stroke-linecap="round"/></svg>Nema rezultata za „'+esc(q)+'”.<br>Pokušaj drugu riječ ili promijeni jezik pretrage.</div>'; return; }
       const grid=document.createElement("div"); grid.className="picto-grid";
-      arr.slice(0,60).forEach(function(it){
-        const kw=(it.keywords&&it.keywords[0]&&it.keywords[0].keyword)? it.keywords[0].keyword : q;
-        grid.appendChild(pictoCard({ label:kw, id:it._id }));
-      });
       box.innerHTML="";
-      const hd=document.createElement("div");
-      hd.style.cssText="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:9px";
-      hd.textContent="ARASAAC rezultati ("+Math.min(arr.length,60)+")";
+      const hd=document.createElement("div"); hd.className="lib-sechd";
+      hd.textContent="ARASAAC rezultati ("+arr.length+")";
       box.appendChild(hd); box.appendChild(grid);
+      const PAGE=60; let shown=0;
+      const more=document.createElement("button"); more.className="btn sm lib-more";
+      const showNext=function(){
+        arr.slice(shown, shown+PAGE).forEach(function(it){
+          const kw=(it.keywords&&it.keywords[0]&&it.keywords[0].keyword)? it.keywords[0].keyword : q;
+          grid.appendChild(pictoCard({ label:kw, id:it._id }));
+        });
+        shown=Math.min(arr.length, shown+PAGE);
+        if(shown<arr.length){ more.textContent="Prikaži još ("+(arr.length-shown)+")"; if(!more.parentNode) box.appendChild(more); }
+        else if(more.parentNode) more.remove();
+      };
+      more.onclick=showNext; showNext();
     })
     .catch(function(){
       if(seq!==searchSeq) return;
+      if($("#libResults .picto")){ box.innerHTML='<div style="font-size:11.5px;color:var(--muted);padding:4px 2px 10px">ARASAAC pretraga nije dostupna (nema interneta) — ugrađeni piktogrami prikazani su iznad.</div>'; return; }
       box.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3a9 9 0 1 0 9 9" stroke-linecap="round"/><path d="M12 8v5M12 16v.2" stroke-linecap="round"/></svg>Pretraga nije uspjela.<br>Provjeri internetsku vezu — ARASAAC pretraga zahtijeva internet.<br>Ugrađeni piktogrami i dalje rade.</div>';
     });
 }, 350);
@@ -1779,7 +1926,7 @@ function ppApplyZoom(){ $("#ppWrap").style.transform="scale("+ppZoom+")"; setVal
 function closePrintPreview(){ $("#ppOverlay").classList.remove("open"); $("#ppWrap").innerHTML=""; }
 function printBoard(){
   if(selSet.size){ clearSelection(); renderBoard(); }
-  setTimeout(function(){ window.print(); }, 60);
+  setTimeout(function(){ updatePrintPageSize(); window.print(); }, 60);
 }
 
 function exportJSON(){
@@ -2095,8 +2242,16 @@ function fitPageNow(){
   setTimeout(zoomFit,30);
   toast("Razmještaj popravljen — sve staje na stranicu","ok");
 }
-function setCols(n){ n=Math.max(1,Math.min(12,n|0)); board.cols=n; resizeCells(); $("#inCols").value=n; markDirty(); renderBoard(); renderFkey(); }
-function setRows(n){ n=Math.max(1,Math.min(14,n|0)); board.rows=n; resizeCells(); $("#inRows").value=n; markDirty(); renderBoard(); renderFkey(); }
+function setGrid(cols, rows){
+  cols=Math.max(1,Math.min(12,cols|0)); rows=Math.max(1,Math.min(14,rows|0));
+  if(cols===board.cols && rows===board.rows){ $("#inCols").value=cols; $("#inRows").value=rows; return; }
+  const oc=board.cols, or=board.rows;
+  board.cols=cols; board.rows=rows; resizeCells(oc,or);
+  $("#inCols").value=cols; $("#inRows").value=rows; setVal("#colsVal",cols); setVal("#rowsVal",rows);
+  markDirty(); renderBoard(); renderCellProps(); renderFkey();
+}
+function setCols(n){ setGrid(n, board.rows); }
+function setRows(n){ setGrid(board.cols, n); }
 
 function applyZoom(){ $("#page").style.transform="scale("+zoom+")"; setVal("#zoomVal",Math.round(zoom*100)+"%"); }
 function zoomFit(){
@@ -2135,7 +2290,7 @@ function arrangeCompact(){
 function clearAllCells(){
   confirmDlg("Isprazniti sva polja?","Svi natpisi i sličice na ovoj ploči bit će uklonjeni. Mreža ostaje ista.","Isprazni",true).then(function(ok){
     if(!ok) return;
-    board.cells=makeCells(board.rows*board.cols); clearSelection(); markDirty(); renderBoard(); renderCellProps();
+    board.cells=makeCells(board.rows*board.cols); board.stash=undefined; clearSelection(); markDirty(); renderBoard(); renderCellProps();
     toast("Sva polja ispražnjena");
   });
 }
@@ -2152,7 +2307,7 @@ function renderPresets(){
   GRID_PRESETS.forEach(function(p){
     const b=document.createElement("button"); b.className="btn sm"; b.style.padding="5px 9px";
     b.textContent=p[0]+"×"+p[1];
-    b.onclick=function(){ board.cols=p[0]; board.rows=p[1]; resizeCells(); syncControls(); markDirty(); renderBoard(); renderFkey(); };
+    b.onclick=function(){ setGrid(p[0], p[1]); syncControls(); };
     wrap.appendChild(b);
   });
 }
@@ -2182,6 +2337,10 @@ const TEMPLATES = [
   { name:"Igra", cols:3, rows:3, items:["igrati","lopta","knjiga","auto","dati","više","ja","ti","gotovo"] },
   { name:"Ljudi i želje", cols:4, rows:3, items:["ja","ti","mama","tata","htjeti","voljeti","dati","pomozi mi","da","ne","molim","hvala"] },
   { name:"Gdje / mjesto", cols:3, rows:3, items:["u","na","ispod","gore","dolje","ovdje","ispred","kuća","škola"] },
+  { name:"Prijedlozi – gdje je?", cols:4, rows:3, items:["u","na","ispod","iznad","pored","iza","ispred","između","unutra","vani","blizu","daleko"] },
+  { name:"Prostorni odnosi", cols:4, rows:4, items:["u","na","ispod","iznad","pored","iza","ispred","između","lijevo","desno","u sredini","oko","unutra","vani","na vrhu","na dnu"] },
+  { name:"Veznici", cols:4, rows:2, items:["i","ili","ali","jer","zato","ako","pa","dok"] },
+  { name:"Prilozi – kada i kako?", cols:4, rows:3, items:["sada","prije","poslije","danas","sutra","jučer","opet","uvijek","polako","brzo","malo","puno"] },
   { name:"Osnovne riječi (core)", cols:4, rows:3, items:["ja","ti","htjeti","više","ići","stati","dati","pomoći","da","ne","ovo","gotovo"] },
   { name:"Radnje (glagoli)", cols:4, rows:3, items:["jesti","piti","ići","igrati","gledati","spavati","raditi","čitati","pisati","trčati","prati","dati"] },
   { name:"Opisne riječi", cols:4, rows:2, items:["velik","malen","vruće","hladno","brz","prljav","sretan","tužan"] },
@@ -2547,6 +2706,7 @@ function wireEvents(){
   $("#ppZoomIn").onclick=function(){ ppZoom=Math.min(2.5,ppZoom+0.1); ppApplyZoom(); };
   $("#ppZoomOut").onclick=function(){ ppZoom=Math.max(.2,ppZoom-0.1); ppApplyZoom(); };
   $("#ppGo").onclick=function(){ closePrintPreview(); printBoard(); };
+  window.addEventListener("beforeprint", updatePrintPageSize);
   window.addEventListener("resize",function(){ if($("#ppOverlay").classList.contains("open")) ppFit(); });
 
   // left tabs
@@ -2556,8 +2716,10 @@ function wireEvents(){
 
   // search
   const si=$("#searchInput");
-  si.addEventListener("input",function(){ const v=si.value.trim(); if(v.length>=2) doSearch(v); else renderBuiltin(); });
-  $("#searchLang").addEventListener("change",function(){ const v=si.value.trim(); if(v.length>=2) doSearch(v); });
+  si.addEventListener("input",function(){ const v=si.value.trim(); if(v.length>=1) runSearch(v); else { searchSeq++; renderBuiltin(); } });
+  $("#searchLang").addEventListener("change",function(){ const v=si.value.trim(); if(v.length>=1) runSearch(v); });
+  $$("#libSize button").forEach(function(b){ b.onclick=function(){ applyLibSize(b.dataset.pcols); }; });
+  (function(){ let n=4; try{ n=+localStorage.getItem("aac_lib_cols")||4; }catch(e){} applyLibSize(n); })();
 
   // upload
   const uz=$("#uploadZone");
@@ -2597,8 +2759,13 @@ function wireEvents(){
   $("#multiDeselect").onclick=function(){ clearSelection(); renderBoard(); renderCellProps(); };
 
   // board props
-  $("#inCols").addEventListener("input",function(e){ setCols(+e.target.value||1); });
-  $("#inRows").addEventListener("input",function(e){ setRows(+e.target.value||1); });
+  const gridInput=function(el,fn){
+    el.addEventListener("input",function(){ const v=parseInt(el.value,10); if(!isNaN(v) && v>=1) fn(v); });
+    el.addEventListener("change",function(){ const v=parseInt(el.value,10); if(isNaN(v)||v<1) syncControls(); else fn(v); });
+    el.addEventListener("blur",function(){ if(el.value===""||isNaN(parseInt(el.value,10))) syncControls(); });
+  };
+  gridInput($("#inCols"),setCols);
+  gridInput($("#inRows"),setRows);
   $("#cellW").addEventListener("input",function(e){ setCellSize("w", +e.target.value); });
   $("#cellH").addEventListener("input",function(e){ setCellSize("h", +e.target.value); });
   $("#cellWNum").addEventListener("input",function(e){ const v=parseFloat(String(e.target.value).replace(",",".")); if(!isNaN(v)) setCellSize("w", pxFromCm(v), true); });
@@ -2742,6 +2909,14 @@ function buildPrintPage(b){
   grid.style.gridTemplateColumns="repeat("+b.cols+", "+cw+"px)";
   grid.style.gridAutoRows=ch+"px";
   grid.style.gap=(b.gap||0)+"px";
+  // stvarna veličina stranice (za vlastitu veličinu papira po ploči u PDF-u)
+  if(!W){
+    const g=(b.gap||0);
+    W=pad*2 + b.cols*cw + (b.cols-1)*g;
+    H=pad*2 + titleH + b.rows*ch + (b.rows-1)*g;
+    page.style.width=W+"px";
+  }
+  page.dataset.pw=W; page.dataset.ph=H;
   b.cells.forEach(function(c){
     const cell=document.createElement("div");
     cell.className="print-cell"+(b.labelPos==="top"?" lt":"");
@@ -2809,9 +2984,17 @@ function doMultiPrint(boards){
   let mp=$("#multiPrint");
   if(!mp){ mp=document.createElement("div"); mp.id="multiPrint"; document.body.appendChild(mp); }
   mp.innerHTML="";
-  boards.forEach(function(b){ mp.appendChild(buildPrintPage(b)); });
+  const rules=[];
+  boards.forEach(function(b,i){
+    const pg=buildPrintPage(b);
+    const size=pageSizeFor(b.pageFmt) || ((Math.ceil(+pg.dataset.pw*PX2MM)+1)+"mm "+(Math.ceil(+pg.dataset.ph*PX2MM)+1)+"mm");
+    rules.push("@page mp"+i+"{size:"+size+";margin:0}");
+    pg.style.setProperty("page","mp"+i);
+    mp.appendChild(pg);
+  });
   document.body.classList.add("multi-print");
-  setPageSizeRule(boards[0]?boards[0].pageFmt:board.pageFmt);
+  const psr=document.getElementById("pageSizeRule");
+  if(psr) psr.textContent=rules.join("\n")+"\n@page{size:"+(rules.length?rules[0].replace(/^@page mp0\{size:([^;]+);.*$/,"$1"):"auto")+";margin:0}";
   let done=false;
   const cleanup=function(){ if(done) return; done=true; document.body.classList.remove("multi-print"); mp.innerHTML=""; setPageSizeRule(board.pageFmt); window.removeEventListener("afterprint",cleanup); };
   window.addEventListener("afterprint",cleanup);

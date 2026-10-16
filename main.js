@@ -95,9 +95,9 @@ function createWindow () {
     const filters = ext
       ? [{ name: ext.toUpperCase(), extensions: [ext] }, { name: 'Sve datoteke', extensions: ['*'] }]
       : [{ name: 'Sve datoteke', extensions: ['*'] }];
-    dialog.showSaveDialog(mainWindow, { defaultPath: name, filters }).then((result) => {
-      if (result.filePath) { item.setSavePath(result.filePath); } else { item.cancel(); }
-    }).catch(() => { item.cancel(); });
+    // Samo JEDAN dijalog: postavke se predaju Electronovom vlastitom dijalogu
+    // "Spremi kao" (ne otvaramo svoj dodatni — to je uzrokovalo dva klika).
+    item.setSaveDialogOptions({ title: 'Spremi kao', defaultPath: name, filters });
   });
 
   // Upozorenje o nespremljenim promjenama prilikom zatvaranja prozora.
@@ -161,7 +161,7 @@ function buildMenu () {
       {
         label: 'Ispis / spremi kao PDF…',
         accelerator: 'CmdOrCtrl+P',
-        click: () => { if (mainWindow) mainWindow.webContents.executeJavaScript('window.print()'); }
+        click: () => { if (mainWindow) mainWindow.webContents.executeJavaScript('(typeof openPrintPreview === "function") ? openPrintPreview() : window.print()'); }
       },
       { type: 'separator' },
       isMac ? { role: 'close', label: 'Zatvori prozor' } : { role: 'quit', label: 'Izlaz' }
