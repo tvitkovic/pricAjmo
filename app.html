@@ -219,6 +219,7 @@
   .cell:hover{border-color:var(--accent)}
   .cell.sel{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);z-index:2}
   .cell.empty-cell{border-style:dashed;border-color:#d7dde6;background:#fcfdfe}
+  .cell.empty-cell.tinted{border-style:solid;border-color:var(--cell-bc,#d7dde6)}
   .cell.empty-cell .cplus{color:#c2cbd6;width:24px;height:24px}
   .cell.empty-cell:hover .cplus{color:var(--accent)}
   .cell .cimg{flex:1;width:100%;display:grid;place-items:center;padding:var(--img-pad,7%);min-height:0}
@@ -276,6 +277,9 @@
     radial-gradient(circle at 1px 1px,rgba(100,116,139,.13) 1px,transparent 0);background-size:22px 22px}
   .pp-wrap{transform-origin:top center;flex-shrink:0}
   .pp-wrap .page{margin:0 auto}
+  .pp-wrap .cell.empty-cell{border-style:solid;background:#fff}
+  .pp-wrap .cell.sel{outline:none;box-shadow:none}
+  .pp-wrap .cplus,.pp-wrap .cdel,.pp-wrap .linkbadge{display:none !important}
   .pp-foot{display:flex;align-items:center;gap:12px;padding:13px 18px;background:#fff;border-top:1px solid var(--line);flex-shrink:0}
   .pp-note{flex:1;font-size:11.5px;color:var(--muted);line-height:1.4}
   .don-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:7px;background:var(--panel-2)}
@@ -300,17 +304,23 @@
   /* Bočne trake namjerno imaju fiksnu, nepromjenjivu širinu (ne suzuju se s prozorom) */
 
   @media print{
-    @page{margin:12mm}
     body{background:#fff;overflow:visible}
     .topbar,.side,.canvas-toolbar,.toast-wrap,.no-print{display:none !important}
     .app,.body,.center,.canvas-scroll{display:block !important;height:auto !important;overflow:visible !important;background:#fff !important;padding:0 !important}
-    .page{box-shadow:none !important;transform:none !important;margin:0 auto !important;border-radius:0 !important;width:auto !important}
+    .page{box-shadow:none !important;transform:none !important;margin:0 auto !important;border-radius:0 !important;overflow:hidden !important}
+    .page.page-fill{height:auto !important;min-height:0 !important}
+    .print-page{min-height:0 !important}
     .cell{break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .cimg,.clab,.page-title,.page{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .cdel,.cell-preview,.linkbadge{display:none !important}
+    .cdel,.cell-preview,.linkbadge,.cplus{display:none !important}
+    .cell.empty-cell{border-style:solid !important;background:#fff}
+    .cell.empty-cell.tinted{background:inherit}
+    .cell.sel{outline:none !important;box-shadow:none !important}
     body.multi-print .app{display:none !important}
     body.multi-print #multiPrint{display:block !important}
     .print-cell,.print-title,.print-page{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .print-page{overflow:hidden;break-after:page;page-break-after:always}
+    .print-page:last-child{break-after:auto;page-break-after:auto}
   }
   #multiPrint{display:none}
   .print-page{background:#fff;margin:0 auto;box-sizing:border-box}
@@ -323,6 +333,7 @@
   .print-cell .pc-lab{width:100%;text-align:center;font-weight:700;color:#23303d;line-height:1.1;padding:3px 4px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .print-title{text-align:center;font-weight:700;color:#222;margin:0 0 16px}
 </style>
+<style id="pageSizeRule">@page{size:210mm 297mm;margin:0}</style>
 </head>
 <body>
 <div class="app">
@@ -508,6 +519,14 @@
             <label>Poveži s pločom <span style="color:var(--muted);font-weight:400">(otvara se u načinu Komunikacija)</span></label>
             <select id="cellLink"></select>
           </div>
+          <div class="field">
+            <label>Veličina slova ovog polja</label>
+            <div class="slider-row" style="gap:10px">
+              <input type="range" id="cellLabSize" min="9" max="60" value="15" style="flex:1">
+              <input type="number" id="cellLabSizeNum" min="9" max="60" style="width:58px;flex-shrink:0;padding:5px 6px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;text-align:center">
+              <button class="btn sm" id="cellLabSizeReset" title="Vrati na zajedničku veličinu ploče" style="flex-shrink:0;padding:5px 9px">Auto</button>
+            </div>
+          </div>
           <div class="section">
             <label>Boja pozadine</label>
             <div class="color-grid" id="cellColors"></div>
@@ -562,16 +581,19 @@
           <label>Veličina polja</label>
           <div class="field" style="margin-bottom:10px">
             <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px"><span>Širina</span><span id="cellWCm" style="font-weight:600;color:var(--accent-d)">≈ 3,2 cm</span></div>
-            <div class="slider-row"><input type="range" id="cellW" min="60" max="400" value="120"><span class="val" id="cellWVal">120</span></div>
+            <div class="slider-row" style="gap:10px"><input type="range" id="cellW" min="60" max="720" value="120" style="flex:1"><input type="number" id="cellWNum" min="1.6" max="19" step="0.1" style="width:64px;flex-shrink:0;padding:5px 6px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;text-align:center"><span class="val" style="flex-shrink:0">cm</span><span id="cellWVal" style="display:none">120</span></div>
           </div>
           <div class="field" style="margin-bottom:10px">
             <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px"><span>Visina</span><span id="cellHCm" style="font-weight:600;color:var(--accent-d)">≈ 3,2 cm</span></div>
-            <div class="slider-row"><input type="range" id="cellH" min="60" max="400" value="120"><span class="val" id="cellHVal">120</span></div>
+            <div class="slider-row" style="gap:10px"><input type="range" id="cellH" min="60" max="720" value="120" style="flex:1"><input type="number" id="cellHNum" min="1.6" max="19" step="0.1" style="width:64px;flex-shrink:0;padding:5px 6px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;text-align:center"><span class="val" style="flex-shrink:0">cm</span><span id="cellHVal" style="display:none">120</span></div>
           </div>
           <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:500;color:var(--ink);text-transform:none;letter-spacing:0;cursor:pointer;margin-top:4px">
             <input type="checkbox" id="lockRatio" checked style="accent-color:var(--accent)"> Zaključaj kvadratni omjer
           </label>
-          <p id="cellSizeFillNote" style="display:none;font-size:11px;color:var(--muted);margin:8px 0 0;line-height:1.4">Veličina se sad računa automatski jer je uključeno „Popuni cijelu stranicu poljima”.</p>
+          <div id="cellSizeFillNote" style="display:none;font-size:11.5px;color:#8a5a12;background:#fff8e8;border:1px solid #f0dcae;border-radius:9px;padding:8px 10px;margin:10px 0 0;line-height:1.45">
+            Veličina polja je <b>zaključana</b> jer je uključeno „Popuni cijelu stranicu poljima” — računa se automatski.
+            <button class="btn sm" id="btnUnlockCellSize" style="width:100%;justify-content:center;margin-top:8px">Otključaj i podesi ručno</button>
+          </div>
         </div>
         <div class="section">
           <label>Veličina sličice u polju</label>
@@ -991,7 +1013,7 @@ function captureDefaults(){
     localStorage.setItem(LASTDEF_KEY, JSON.stringify({
       cellW:board.cellW, cellH:board.cellH, gap:board.gap, labelPos:board.labelPos, labSize:board.labSize,
       borderW:board.borderW, cellRad:board.cellRad, pageFmt:board.pageFmt, showTitle:board.showTitle,
-      imgFill:board.imgFill, borderMode:board.borderMode, autoCat:board.autoCat, fillPage:board.fillPage
+      imgFill:board.imgFill, borderMode:board.borderMode, autoCat:board.autoCat
     }));
   }catch(e){}
 }
@@ -1001,10 +1023,10 @@ function newBoard(){
   return { id:uid(), name:"Nova ploča", created:Date.now(), modified:Date.now(),
     rows:rows, cols:cols, cellW:d.cellW, cellH:d.cellH, gap:d.gap, labelPos:d.labelPos, labSize:d.labSize,
     borderW:d.borderW, cellRad:d.cellRad, pageFmt:d.pageFmt, showTitle:d.showTitle, imgFill:d.imgFill,
-    borderMode:d.borderMode, autoCat:d.autoCat, fillPage:d.fillPage, cells:makeCells(rows*cols) };
+    borderMode:d.borderMode, autoCat:d.autoCat, fillPage:false, cells:makeCells(rows*cols) };
 }
 function makeCells(n){ const a=[]; for(let i=0;i<n;i++) a.push(emptyCell()); return a; }
-function emptyCell(){ return { id:uid(), label:"", imgType:null, imgData:null, cat:null, color:null, link:null, imgPos:null }; }
+function emptyCell(){ return { id:uid(), label:"", imgType:null, imgData:null, cat:null, color:null, link:null, imgPos:null, labSize:null }; }
 function resizeCells(){
   const need=board.rows*board.cols;
   if(board.cells.length<need){ while(board.cells.length<need) board.cells.push(emptyCell()); }
@@ -1059,6 +1081,21 @@ function applyPageFormat(){
     page.style.setProperty("--pg-pad","30px");
   }
   else { page.style.width="auto"; page.style.height="auto"; page.style.minHeight="auto"; page.classList.remove("page-fill"); page.style.setProperty("--pg-pad","28px"); }
+  setPageSizeRule(board.pageFmt);
+}
+/* Papir pri ispisu mora točno odgovarati formatu ploče, bez dodatnih rubova
+   preglednika (inače se sadržaj prelijeva na drugu stranicu). */
+function setPageSizeRule(fmt){
+  const el=document.getElementById("pageSizeRule"); if(!el) return;
+  let size;
+  switch(fmt){
+    case "a4p": size="210mm 297mm"; break;
+    case "a4l": size="297mm 210mm"; break;
+    case "letterp": size="215.9mm 279.4mm"; break;
+    case "letterl": size="279.4mm 215.9mm"; break;
+    default: size="auto";
+  }
+  el.textContent="@page{size:"+size+";margin:0}";
 }
 function applyFillPageSizing(){
   const page=$("#page"), grid=$("#grid"), title=$("#pageTitle");
@@ -1074,6 +1111,8 @@ function applyFillPageSizing(){
   const ch = Math.max(24, Math.floor((availH - (rows-1)*gap)/rows));
   grid.style.gridTemplateColumns="repeat("+cols+", "+cw+"px)";
   grid.style.gridAutoRows=ch+"px";
+  effCell={w:cw,h:ch};
+  if($("#cellWNum")) syncCellSizeUI();
 }
 function imgMarkup(c){
   if(c.imgType==="svg") return c.imgData;
@@ -1098,22 +1137,22 @@ function renderBoard(){
     if(board.labelPos==="top") cls+=" lbl-top";
     if(board.labelPos==="none") cls+=" no-label";
     const hasContent=c.imgData||c.label;
-    if(!hasContent) cls+=" empty-cell";
+    const catColor = c.color || (c.cat&&fitz[c.cat]?fitz[c.cat].color:null);
+    if(!hasContent) cls+=" empty-cell"+(catColor?" tinted":"");
     if(selSet.has(i)) cls+=" sel";
     cell.className=cls;
-    cell.style.setProperty("--cell-bw", (board.borderMode==="frame" && hasContent && (c.color||c.cat) ? Math.max(board.borderW,4) : board.borderW)+"px");
+    cell.style.setProperty("--cell-bw", (board.borderMode==="frame" && catColor ? Math.max(board.borderW,4) : board.borderW)+"px");
     cell.style.setProperty("--cell-r", board.cellRad+"px");
-    cell.style.setProperty("--lab-size", board.labSize+"px");
+    cell.style.setProperty("--lab-size", (c.labSize||board.labSize)+"px");
     cell.style.setProperty("--img-pad", Math.max(0,(100-(board.imgFill==null?86:board.imgFill))/2)+"%");
-    const catColor = c.color || (c.cat&&fitz[c.cat]?fitz[c.cat].color:null);
     let bg;
     if(board.borderMode==="frame"){
       bg="#fff";
-      if(catColor && hasContent) cell.style.setProperty("--cell-bc", catColor);
+      if(catColor) cell.style.setProperty("--cell-bc", catColor);
       else cell.style.removeProperty("--cell-bc");
     } else {
       bg = catColor || "#fff";
-      if(board.borderMode==="category" && hasContent) cell.style.setProperty("--cell-bc", darken(bg,0.4));
+      if(board.borderMode==="category" && catColor) cell.style.setProperty("--cell-bc", darken(bg,0.4));
       else cell.style.removeProperty("--cell-bc");
     }
     cell.style.background=bg;
@@ -1260,6 +1299,11 @@ function renderCellProps(){
   $("#cellLabel").value=c.label||"";
   $("#cellCat").value=c.cat||"";
   fillCellLinkOptions(c);
+  const effLab = c.labSize || board.labSize;
+  $("#cellLabSize").value = effLab;
+  $("#cellLabSizeNum").value = effLab;
+  $("#cellLabSizeNum").placeholder = board.labSize;
+  $("#cellLabSizeReset").style.opacity = c.labSize ? "1" : ".45";
   renderCellColors(c);
   $("#cellColorCustom").value=toHex(bg);
 }
@@ -1352,7 +1396,7 @@ function openImagePositioner(idx){
 function maybeAutoCat(c){ if(!board.autoCat || !c.label) return false; const cat=classifyWord(c.label); if(cat){ c.cat=cat; if(fitz[cat]) c.color=fitz[cat].color; return true; } return false; }
 function placePictoData(data,idx){
   const c=board.cells[idx];
-  c.imgType=data.imgType; c.imgData=data.imgData;
+  c.imgType=data.imgType; c.imgData=data.imgData; c.imgPos=null; // novi piktogram = novi kadar
   if(!c.label) c.label=data.label||"";
   if(data.cat){ c.cat=data.cat; if(!c.color && fitz[data.cat]) c.color=fitz[data.cat].color; }
   else maybeAutoCat(c);
@@ -1616,7 +1660,8 @@ async function renderToCanvas(scale){
     roundRectPath(ctx,x,y,L.cw,L.ch,board.cellRad);
     ctx.fillStyle=bg; ctx.fill();
     if(lw>0){ ctx.lineWidth=lw; ctx.strokeStyle=strokeColor; ctx.stroke(); }
-    const labH = (board.labelPos==="none"||!c.label) ? 0 : board.labSize+10;
+    const cLabSize = c.labSize||board.labSize;
+    const labH = (board.labelPos==="none"||!c.label) ? 0 : cLabSize+10;
     let imgArea={x:x,y:y,w:L.cw,h:L.ch-labH};
     let labY = y+L.ch-labH/2;
     if(board.labelPos==="top" && labH){ imgArea.y=y+labH; labY=y+labH/2; }
@@ -1641,7 +1686,7 @@ async function renderToCanvas(scale){
       }
     }
     if(labH){
-      ctx.fillStyle="#23303d"; ctx.font="700 "+board.labSize+"px Arial, sans-serif";
+      ctx.fillStyle="#23303d"; ctx.font="700 "+cLabSize+"px Arial, sans-serif";
       ctx.textAlign="center"; ctx.textBaseline="middle";
       ctx.fillText(fitText(ctx,c.label,L.cw-12), x+L.cw/2, labY);
     }
@@ -1684,7 +1729,8 @@ async function exportSVG(){
         strokeColor=(board.borderMode==="category"&&hasContent)?darken(bg,0.4):"#c2ccd8";
       }
       s+='<rect x="'+x+'" y="'+y+'" width="'+L.cw+'" height="'+L.ch+'" rx="'+board.cellRad+'" fill="'+bg+'"'+(lw>0?(' stroke="'+strokeColor+'" stroke-width="'+lw+'"'):'')+'/>\n';
-      const labH=(board.labelPos==="none"||!c.label)?0:board.labSize+10;
+      const cLabSize=c.labSize||board.labSize;
+      const labH=(board.labelPos==="none"||!c.label)?0:cLabSize+10;
       let ay=y, ah=L.ch-labH; let labY=y+L.ch-labH/2;
       if(board.labelPos==="top"&&labH){ ay=y+labH; labY=y+labH/2; }
       if(srcs[i]){
@@ -1697,7 +1743,7 @@ async function exportSVG(){
           : "xMidYMid meet";
         s+='<image x="'+(x+padp)+'" y="'+(ay+padp)+'" width="'+iw+'" height="'+ih+'" preserveAspectRatio="'+par+'" xlink:href="'+href+'"/>\n';
       }
-      if(labH){ s+='<text x="'+(x+L.cw/2)+'" y="'+(labY+board.labSize*0.34)+'" font-family="Arial, sans-serif" font-weight="700" font-size="'+board.labSize+'" text-anchor="middle" fill="#23303d">'+esc(c.label)+'</text>\n'; }
+      if(labH){ s+='<text x="'+(x+L.cw/2)+'" y="'+(labY+cLabSize*0.34)+'" font-family="Arial, sans-serif" font-weight="700" font-size="'+cLabSize+'" text-anchor="middle" fill="#23303d">'+esc(c.label)+'</text>\n'; }
     }
     s+='</svg>\n';
     downloadBlob(new Blob([s],{type:"image/svg+xml"}), fileBase()+".svg");
@@ -1714,6 +1760,8 @@ function openPrintPreview(){
   const clone=$("#page").cloneNode(true);
   clone.style.transform="none";
   $$(".cdel,.linkbadge,.cplus",clone).forEach(function(el){ el.style.display="none"; });
+  // klon ne smije nositi iste ID-jeve kao prava stranica
+  clone.removeAttribute("id"); $$("[id]",clone).forEach(function(el){ el.removeAttribute("id"); });
   wrap.appendChild(clone);
   ppZoom=1;
   setTimeout(ppFit,10);
@@ -1728,7 +1776,7 @@ function ppFit(){
   ppApplyZoom();
 }
 function ppApplyZoom(){ $("#ppWrap").style.transform="scale("+ppZoom+")"; setVal("#ppZoomVal",Math.round(ppZoom*100)+"%"); }
-function closePrintPreview(){ $("#ppOverlay").classList.remove("open"); }
+function closePrintPreview(){ $("#ppOverlay").classList.remove("open"); $("#ppWrap").innerHTML=""; }
 function printBoard(){
   if(selSet.size){ clearSelection(); renderBoard(); }
   setTimeout(function(){ window.print(); }, 60);
@@ -1746,11 +1794,18 @@ function importJSON(file){
       const d=JSON.parse(fr.result);
       const b = d.board || d;
       if(!b || !b.cells || !b.rows) throw new Error("format");
-      b.id = b.id || uid();
-      board=b; clearSelection(); dirty=true;
-      if(d.fitz) fitz=Object.assign(JSON.parse(JSON.stringify(FITZ_DEFAULT)), d.fitz);
-      syncControls(); renderFkey(); renderBoard(); renderCellProps(); updateSaveState(); resetHistory();
-      toast("Projekt učitan — spremi da ga zadržiš","ok");
+      const go=function(){
+        // novi ID ako ploča s tim ID-om već postoji — spremanje nikad ne smije tiho prepisati postojeću ploču
+        if(!b.id || store.boards[b.id]){ b.id=uid(); b.created=Date.now(); }
+        b.folderId=null;
+        const dropped=stripForeignLinks(b);
+        board=b; clearSelection(); dirty=true;
+        if(d.fitz) fitz=Object.assign(JSON.parse(JSON.stringify(FITZ_DEFAULT)), d.fitz);
+        syncControls(); renderFkey(); renderBoard(); renderCellProps(); updateSaveState(); resetHistory();
+        toast("Projekt učitan — spremi da ga zadržiš"+(dropped?" (uklonjeno nevažećih poveznica: "+dropped+")":""),"ok");
+      };
+      if(dirty){ confirmDlg("Učitati projekt?","Trenutna ploča ima nespremljene promjene koje će biti izgubljene.","Učitaj",true).then(function(ok){ if(ok) go(); }); }
+      else go();
     }catch(e){ toast("Datoteka nije ispravan projekt.","err"); }
   };
   fr.readAsText(file);
@@ -1918,10 +1973,15 @@ function deleteBoard(id){
     if(!ok) return;
     delete store.boards[id];
     store.order=store.order.filter(function(x){return x!==id;});
+    // ukloni poveznice koje su vodile na izbrisanu ploču
+    let cleaned=0;
+    Object.keys(store.boards).forEach(function(bid){ store.boards[bid].cells.forEach(function(c){ if(c.link===id){ c.link=null; cleaned++; } }); });
+    if(board) board.cells.forEach(function(c){ if(c.link===id){ c.link=null; cleaned++; } });
     persist(); renderBoardList();
+    if(board && board.id!==id){ renderBoard(); if(selIdx!=null) renderCellProps(); }
     if(board && board.id===id){ const next=store.order.find(function(x){return store.boards[x];});
       if(next){ openBoard(next,true); } else { board=newBoard(); clearSelection(); dirty=false; syncControls(); renderBoard(); renderCellProps(); resetHistory(); } }
-    toast("Ploča izbrisana");
+    toast("Ploča izbrisana"+(cleaned?" (uklonjeno poveznica: "+cleaned+")":""));
   });
 }
 
@@ -1983,8 +2043,7 @@ function setVal(id,v){ const e=$(id); if(e) e.textContent=v; }
 function syncControls(){
   $("#boardName").value=board.name||"";
   $("#inCols").value=board.cols; $("#inRows").value=board.rows;
-  $("#cellW").value=board.cellW; setVal("#cellWVal",board.cellW); setVal("#cellWCm","≈ "+cmText(board.cellW));
-  $("#cellH").value=board.cellH; setVal("#cellHVal",board.cellH); setVal("#cellHCm","≈ "+cmText(board.cellH));
+  syncCellSizeUI();
   $("#imgFill").value=(board.imgFill==null?86:board.imgFill); $("#imgFillNum").value=(board.imgFill==null?86:board.imgFill);
   $("#gapR").value=board.gap; setVal("#gapVal",board.gap);
   $("#labelPos").value=board.labelPos;
@@ -1999,13 +2058,33 @@ function syncControls(){
   updateFillPageUI();
   setVal("#colsVal",board.cols); setVal("#rowsVal",board.rows);
 }
+/* ---- Veličina polja: jedno mjesto za klizač, unos u cm i prikaz ---- */
+const CELL_PX_MIN=60, CELL_PX_MAX=720;
+let effCell={w:null,h:null};   // stvarna veličina kad je uključeno „Popuni stranicu”
+function setCellSize(axis, px, fromTyping){
+  px=Math.round(Math.max(CELL_PX_MIN, Math.min(CELL_PX_MAX, px)));
+  if(axis==="w"){ board.cellW=px; if($("#lockRatio").checked) board.cellH=px; }
+  else { board.cellH=px; if($("#lockRatio").checked) board.cellW=px; }
+  markDirty(); renderBoard(); captureDefaults();
+  syncCellSizeUI(fromTyping?axis:null);
+}
+function syncCellSizeUI(skipAxis){
+  const fill=!!board.fillPage && isFixedPageFmt(board.pageFmt);
+  const w=(fill&&effCell.w)?effCell.w:board.cellW, h=(fill&&effCell.h)?effCell.h:board.cellH;
+  $("#cellW").value=Math.min(CELL_PX_MAX,w); $("#cellH").value=Math.min(CELL_PX_MAX,h);
+  setVal("#cellWVal",w); setVal("#cellHVal",h);
+  setVal("#cellWCm",(fill?"automatski: ":"≈ ")+cmText(w)); setVal("#cellHCm",(fill?"automatski: ":"≈ ")+cmText(h));
+  if(skipAxis!=="w") $("#cellWNum").value=cmFromPx(w).toFixed(1);
+  if(skipAxis!=="h") $("#cellHNum").value=cmFromPx(h).toFixed(1);
+}
 function updateFillPageUI(){
   const fixed=isFixedPageFmt(board.pageFmt);
   $("#fillPage").disabled=!fixed;
   $("#fillPageRow").style.opacity=fixed?"1":".45";
   $("#fillPageHint").style.display=(fixed&&board.fillPage)?"block":"none";
   const active=fixed&&board.fillPage;
-  [$("#cellW"),$("#cellH")].forEach(function(el){ el.disabled=active; });
+  [$("#cellW"),$("#cellH"),$("#cellWNum"),$("#cellHNum")].forEach(function(el){ el.disabled=active; });
+  syncCellSizeUI();
   const note=$("#cellSizeFillNote");
   if(note) note.style.display=active?"block":"none";
 }
@@ -2045,7 +2124,8 @@ function switchRTab(name){
 
 function arrangeCompact(){
   if(!board) return;
-  const filled=board.cells.filter(function(c){return c.imgData||c.label;});
+  // zadrži i obojana / povezana polja bez teksta — samo potpuno prazna idu na kraj
+  const filled=board.cells.filter(function(c){return c.imgData||c.label||c.color||c.cat||c.link;});
   const rest=board.cells.length-filled.length;
   const out=filled.slice();
   for(let i=0;i<rest;i++) out.push(emptyCell());
@@ -2215,12 +2295,23 @@ function openSaveAsTemplate(){
   });
   $("#tplName",ov).addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); submit(); } });
 }
+/* Ukloni poveznice na ploče koje ne postoje na ovom računalu (npr. uvezeno od kolege) */
+function stripForeignLinks(b){
+  let n=0;
+  (b.cells||[]).forEach(function(c){ if(c.link && !store.boards[c.link]){ c.link=null; n++; } });
+  return n;
+}
 function applyUserTemplate(id){
   const ut=store.userTemplates.find(function(t){return t.id===id;}); if(!ut) return;
-  board=JSON.parse(JSON.stringify(ut.board)); board.id=uid(); board.created=Date.now(); board.modified=Date.now();
-  clearSelection(); dirty=true; zoom=1; applyZoom();
-  syncControls(); renderFkey(); renderBoard(); renderCellProps(); switchRTab("cell"); updateSaveState(); resetHistory();
-  setTimeout(zoomFit,30); toast("Ploča iz predloška: "+ut.name,"ok");
+  const go=function(){
+    board=JSON.parse(JSON.stringify(ut.board)); board.id=uid(); board.created=Date.now(); board.modified=Date.now(); board.folderId=null;
+    stripForeignLinks(board);
+    clearSelection(); dirty=true; zoom=1; applyZoom();
+    syncControls(); renderFkey(); renderBoard(); renderCellProps(); switchRTab("cell"); updateSaveState(); resetHistory();
+    setTimeout(zoomFit,30); toast("Ploča iz predloška: "+ut.name,"ok");
+  };
+  if(dirty){ confirmDlg("Nova ploča iz predloška?","Trenutna ploča ima nespremljene promjene koje će biti izgubljene.","Nastavi",true).then(function(ok){ if(ok) go(); }); }
+  else go();
 }
 function deleteUserTemplate(id){
   const ut=store.userTemplates.find(function(t){return t.id===id;}); if(!ut) return;
@@ -2508,12 +2599,12 @@ function wireEvents(){
   // board props
   $("#inCols").addEventListener("input",function(e){ setCols(+e.target.value||1); });
   $("#inRows").addEventListener("input",function(e){ setRows(+e.target.value||1); });
-  $("#cellW").addEventListener("input",function(e){ board.cellW=+e.target.value; setVal("#cellWVal",board.cellW); setVal("#cellWCm","≈ "+cmText(board.cellW));
-    if($("#lockRatio").checked){ board.cellH=board.cellW; $("#cellH").value=board.cellH; setVal("#cellHVal",board.cellH); setVal("#cellHCm","≈ "+cmText(board.cellH)); }
-    markDirty(); renderBoard(); captureDefaults(); });
-  $("#cellH").addEventListener("input",function(e){ board.cellH=+e.target.value; setVal("#cellHVal",board.cellH); setVal("#cellHCm","≈ "+cmText(board.cellH));
-    if($("#lockRatio").checked){ board.cellW=board.cellH; $("#cellW").value=board.cellW; setVal("#cellWVal",board.cellW); setVal("#cellWCm","≈ "+cmText(board.cellW)); }
-    markDirty(); renderBoard(); captureDefaults(); });
+  $("#cellW").addEventListener("input",function(e){ setCellSize("w", +e.target.value); });
+  $("#cellH").addEventListener("input",function(e){ setCellSize("h", +e.target.value); });
+  $("#cellWNum").addEventListener("input",function(e){ const v=parseFloat(String(e.target.value).replace(",",".")); if(!isNaN(v)) setCellSize("w", pxFromCm(v), true); });
+  $("#cellHNum").addEventListener("input",function(e){ const v=parseFloat(String(e.target.value).replace(",",".")); if(!isNaN(v)) setCellSize("h", pxFromCm(v), true); });
+  $("#cellWNum").addEventListener("blur",function(){ syncCellSizeUI(); });
+  $("#cellHNum").addEventListener("blur",function(){ syncCellSizeUI(); });
   $("#imgFill").addEventListener("input",function(e){ board.imgFill=+e.target.value; $("#imgFillNum").value=board.imgFill; markDirty(); renderBoard(); captureDefaults(); });
   $("#imgFillNum").addEventListener("input",function(e){
     let v=Math.round(+e.target.value); if(isNaN(v)) return;
@@ -2541,13 +2632,38 @@ function wireEvents(){
   $("#cellRad").addEventListener("input",function(e){ board.cellRad=+e.target.value; setVal("#cellRadVal",board.cellRad); markDirty(); renderBoard(); captureDefaults(); });
   $("#pageFmt").addEventListener("change",function(e){ board.pageFmt=e.target.value; if(!isFixedPageFmt(board.pageFmt)) board.fillPage=false; markDirty(); updateFillPageUI(); renderBoard(); setTimeout(zoomFit,30); captureDefaults(); });
   $("#showTitle").addEventListener("change",function(e){ board.showTitle=e.target.checked; markDirty(); renderBoard(); captureDefaults(); });
-  $("#fillPage").addEventListener("change",function(e){ board.fillPage=e.target.checked; markDirty(); updateFillPageUI(); renderBoard(); setTimeout(zoomFit,30); captureDefaults(); });
+  $("#fillPage").addEventListener("change",function(e){
+    if(!e.target.checked && effCell.w && effCell.h){ board.cellW=Math.min(CELL_PX_MAX,effCell.w); board.cellH=Math.min(CELL_PX_MAX,effCell.h); $("#lockRatio").checked=(board.cellW===board.cellH); }
+    board.fillPage=e.target.checked; markDirty(); updateFillPageUI(); renderBoard(); setTimeout(zoomFit,30); captureDefaults(); });
   $("#btnFitPage").addEventListener("click",fitPageNow);
+  $("#btnUnlockCellSize").addEventListener("click",function(){
+    // zadrži trenutnu stvarnu veličinu kao polaznu točku za ručno podešavanje
+    if(effCell.w && effCell.h){ board.cellW=Math.min(CELL_PX_MAX,effCell.w); board.cellH=Math.min(CELL_PX_MAX,effCell.h); $("#lockRatio").checked=(board.cellW===board.cellH); }
+    board.fillPage=false; $("#fillPage").checked=false;
+    markDirty(); updateFillPageUI(); renderBoard(); captureDefaults();
+    toast("Veličina polja otključana","ok");
+  });
 
   // cell props
   $("#cellLabel").addEventListener("input",function(e){ if(selIdx==null) return; const c=board.cells[selIdx]; c.label=e.target.value; $("#cpLab").textContent=e.target.value||"—"; if(maybeAutoCat(c)){ $("#cellCat").value=c.cat||""; const bg=c.color||(c.cat&&fitz[c.cat]?fitz[c.cat].color:"#fff"); $("#cellPreview").style.setProperty("--prev-bg",bg); $("#cellColorCustom").value=toHex(bg); } markDirty(); renderBoard(); });
   $("#cellCat").addEventListener("change",function(e){ if(selIdx==null) return; const c=board.cells[selIdx]; c.cat=e.target.value||null; if(c.cat&&fitz[c.cat]) c.color=fitz[c.cat].color; markDirty(); renderBoard(); renderCellProps(); });
   $("#cellLink").addEventListener("change",function(e){ if(selIdx==null) return; board.cells[selIdx].link=e.target.value||null; markDirty(); renderBoard(); });
+  const applyCellLab=function(v){
+    if(selIdx==null) return;
+    v=Math.round(+v); if(isNaN(v)) return;
+    v=Math.max(9,Math.min(60,v));
+    board.cells[selIdx].labSize=v;
+    $("#cellLabSize").value=v; $("#cellLabSizeNum").value=v;
+    $("#cellLabSizeReset").style.opacity="1";
+    markDirty(); renderBoard();
+  };
+  $("#cellLabSize").addEventListener("input",function(e){ applyCellLab(e.target.value); });
+  $("#cellLabSizeNum").addEventListener("input",function(e){ applyCellLab(e.target.value); });
+  $("#cellLabSizeReset").addEventListener("click",function(){
+    if(selIdx==null) return;
+    board.cells[selIdx].labSize=null;
+    markDirty(); renderBoard(); renderCellProps();
+  });
   $("#cellColorCustom").addEventListener("input",function(e){ if(selIdx==null) return; board.cells[selIdx].color=e.target.value; markDirty(); renderBoard(); renderCellProps(); });
   $("#cellClear").onclick=function(){ if(selIdx!=null) clearCell(selIdx); };
   $("#cellExport").onclick=function(){ if(selIdx!=null) exportCellPictogram(selIdx); };
@@ -2634,11 +2750,11 @@ function buildPrintPage(b){
     let bg, bc, bw=(b.borderW||0);
     if(b.borderMode==="frame"){
       bg="#ffffff";
-      bc = (catColor && hasContent) ? catColor : "#c2ccd8";
-      if(catColor && hasContent) bw=Math.max(bw,4);
+      bc = catColor ? catColor : "#c2ccd8";
+      if(catColor) bw=Math.max(bw,4);
     } else {
       bg = catColor || "#ffffff";
-      bc = (b.borderMode==="category" && hasContent) ? darken(bg,0.4) : "#c2ccd8";
+      bc = (b.borderMode==="category" && catColor) ? darken(bg,0.4) : "#c2ccd8";
     }
     cell.style.border=bw+"px solid "+bc;
     cell.style.borderRadius=(b.cellRad||0)+"px";
@@ -2646,7 +2762,7 @@ function buildPrintPage(b){
     const pad=Math.max(0,(100-(b.imgFill==null?86:b.imgFill))/2);
     let h="";
     h += c.imgData ? '<div class="pc-img" style="padding:'+pad+'%">'+imgMarkup(c)+'</div>' : '<div class="pc-img"></div>';
-    if(b.labelPos!=="none") h += '<div class="pc-lab" style="font-size:'+(b.labSize||15)+'px">'+esc(c.label)+'</div>';
+    if(b.labelPos!=="none") h += '<div class="pc-lab" style="font-size:'+(c.labSize||b.labSize||15)+'px">'+esc(c.label)+'</div>';
     cell.innerHTML=h;
     grid.appendChild(cell);
   });
@@ -2695,8 +2811,9 @@ function doMultiPrint(boards){
   mp.innerHTML="";
   boards.forEach(function(b){ mp.appendChild(buildPrintPage(b)); });
   document.body.classList.add("multi-print");
+  setPageSizeRule(boards[0]?boards[0].pageFmt:board.pageFmt);
   let done=false;
-  const cleanup=function(){ if(done) return; done=true; document.body.classList.remove("multi-print"); mp.innerHTML=""; window.removeEventListener("afterprint",cleanup); };
+  const cleanup=function(){ if(done) return; done=true; document.body.classList.remove("multi-print"); mp.innerHTML=""; setPageSizeRule(board.pageFmt); window.removeEventListener("afterprint",cleanup); };
   window.addEventListener("afterprint",cleanup);
   toast("Pripremam "+boards.length+" "+(boards.length===1?"ploču":"ploče")+" za PDF…");
   setTimeout(function(){ window.print(); setTimeout(cleanup,1200); }, 120);
